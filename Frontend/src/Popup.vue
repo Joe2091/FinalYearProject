@@ -1,43 +1,51 @@
 <template>
-    <div>
-      <h2>Notes Extension</h2>
-      <textarea v-model="note" placeholder="Write your note..."></textarea>
-      <button @click="saveNote">Save</button>
-      <p>Saved Note: {{ savedNote }}</p>
+  <div>
+    <h2>Notes Extension</h2>
+    <input v-model="newNoteTitle" placeholder="Title" />
+    <textarea v-model="newNoteContent" placeholder="Write your note..."></textarea>
+    <button @click="addNote">Save Note</button>
+
+    <div v-for="note in notes" :key="note._id">
+      <h3>{{ note.title }}</h3>
+      <p>{{ note.content }}</p>
+      <button @click="deleteNote(note._id)">Delete</button>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        note: '',
-        savedNote: ''
+  </div>
+</template>
+
+<script>
+import { ref, onMounted } from "vue";
+import { getNotes, createNote, deleteNote } from "@/api/noteService";
+
+export default {
+  setup() {
+    const notes = ref([]);
+    const newNoteTitle = ref("");
+    const newNoteContent = ref("");
+
+    const fetchNotes = async () => {
+      notes.value = await getNotes();
+    };
+
+    const addNote = async () => {
+      const newNote = {
+        title: newNoteTitle.value,
+        content: newNoteContent.value,
       };
-    },
-    methods: {
-      saveNote() {
-        chrome.storage.local.set({ note: this.note }, () => {
-          console.log('Note saved!');
-          this.loadNote();
-        });
-      },
-      loadNote() {
-        chrome.storage.local.get('note', (data) => {
-          this.savedNote = data.note || '';
-        });
-      }
-    },
-    mounted() {
-      this.loadNote();
-    }
-  };
-  </script>
-  
-  <style>
-  textarea {
-    width: 100%;
-    height: 80px;
-  }
-  </style>
-  
+      await createNote(newNote);
+      newNoteTitle.value = "";
+      newNoteContent.value = "";
+      fetchNotes(); // Refreshes created notes list
+    };
+
+    const deleteNoteById = async (id) => {
+      await deleteNote(id);
+      fetchNotes();
+    };
+
+    onMounted(fetchNotes);
+
+    return { notes, newNoteTitle, newNoteContent, addNote, deleteNote: deleteNoteById };
+  },
+};
+</script>
