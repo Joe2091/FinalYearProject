@@ -2,7 +2,10 @@
   <div>
     <h2>Notes Extension</h2>
     <input v-model="newNoteTitle" placeholder="Title" />
-    <textarea v-model="newNoteContent" placeholder="Write your note..."></textarea>
+    <textarea
+      v-model="newNoteContent"
+      placeholder="Write your note..."
+    ></textarea>
     <button @click="addNote">Save Note</button>
 
     <div v-for="note in notes" :key="note._id">
@@ -45,7 +48,13 @@ export default {
 
     onMounted(fetchNotes);
 
-    return { notes, newNoteTitle, newNoteContent, addNote, deleteNote: deleteNoteById };
+    return {
+      notes,
+      newNoteTitle,
+      newNoteContent,
+      addNote,
+      deleteNote: deleteNoteById,
+    };
   },
 };
 </script>
