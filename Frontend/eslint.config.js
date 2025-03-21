@@ -6,7 +6,7 @@ import vueParser from "vue-eslint-parser";
 
 /** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
-  // Ignore common files and folders
+  // Ignore common files and folders which could cause issues
   {
     ignores: [
       "node_modules/",
@@ -27,7 +27,7 @@ export default [
         ecmaVersion: "latest",
         sourceType: "module",
         ecmaFeatures: {
-          jsx: true, // Enables Vue JSX if needed
+          jsx: true, // Vue JSX enabled
         },
       },
       globals: {
