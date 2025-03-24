@@ -80,8 +80,9 @@ app.get("/api/notes", async (req, res) => {
 
 // Update a Note
 app.put("/api/notes/:id", async (req, res) => {
+  const { title, content } = req.body;
+
   try {
-    const { title, content } = req.body;
     const updatedNote = await Note.findByIdAndUpdate(
       req.params.id,
       { title, content },
