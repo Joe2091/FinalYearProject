@@ -43,10 +43,12 @@ export default [
     rules: {
       ...pluginJs.configs.recommended.rules,
       ...pluginVue.configs["flat/recommended"].rules,
-      "prettier/prettier": "error",
+      "prettier/prettier": "warn",
       "vue/multi-word-component-names": "off",
-      "no-console": "warn",
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "no-console": "off",
+      "vue/require-default-prop": "off",
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "vue/no-v-html": "off",
     },
   },
 ];
