@@ -3,7 +3,6 @@
     <v-toolbar flat>
       <v-toolbar-title>NoteSpace</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn text @click="goToExtension">Open Extension</v-btn>
     </v-toolbar>
 
     <v-text-field
@@ -42,11 +41,7 @@ const notes = ref([
 
 const filteredNotes = computed(() =>
   notes.value.filter((n) =>
-    n.title.toLowerCase().includes(search.value.toLowerCase()),
-  ),
+    n.title.toLowerCase().includes(search.value.toLowerCase())
+  )
 );
-
-function goToExtension() {
-  window.open("chrome-extension://your-extension-id", "_blank");
-}
 </script>
