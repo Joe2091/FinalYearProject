@@ -42,8 +42,8 @@ const notes = ref([
 
 const filteredNotes = computed(() =>
   notes.value.filter((n) =>
-    n.title.toLowerCase().includes(search.value.toLowerCase())
-  )
+    n.title.toLowerCase().includes(search.value.toLowerCase()),
+  ),
 );
 
 function goToExtension() {
