@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://16.170.146.39:5000/api/notes'; //Note for future, Update this when deploying
+const API_URL = 'http://localhost:5000/api/notes'; //Back to Local for Development (will switch from AWS to Azure)
 
 // Fetch all notes
 export const getNotes = async () => {
