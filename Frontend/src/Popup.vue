@@ -1,9 +1,11 @@
 <template>
   <v-app>
+    <Sidebar :is-dark="isDark" @navigate="currentView = $event" @toggle-theme="toggleTheme" />
+
     <v-snackbar
       v-model="snackbar.show"
       :color="snackbar.color"
-      timeout="1300"
+      timeout="1500"
       location="top"
       transition="slide-y-transition"
       class="mx-auto mt-2 elevation-6"
@@ -21,55 +23,28 @@
 
     <v-main>
       <v-container>
-        <!-- Create A Note Feature -->
-        <v-card class="pa-4 mb-4">
-          <v-card-title>NoteMAX</v-card-title>
-          <v-text-field v-model="newTitle" label="Title" dense outlined />
-          <v-textarea v-model="newContent" label="Content" dense outlined />
-          <v-btn color="primary" class="mt-2" @click="addNote">Add Note</v-btn>
-        </v-card>
-
-        <!-- List of all notes -->
-        <v-row>
-          <v-col v-for="note in [...notes].reverse()" :key="note._id" cols="12" sm="6" md="4">
-            <v-card class="pa-3">
-              <div v-if="editingNoteId === note._id">
-                <v-text-field v-model="editTitle" label="Title" dense outlined />
-                <v-textarea v-model="editContent" label="Content" dense outlined />
-                <v-btn color="primary" @click="saveEdit">Save</v-btn>
-                <v-btn text @click="cancelEdit">Cancel</v-btn>
-              </div>
-              <div v-else>
-                <h3>{{ note.title }}</h3>
-                <p>{{ note.content }}</p>
-                <v-btn icon @click="startEditing(note)">
-                  <v-icon>mdi-pencil</v-icon>
-                </v-btn>
-                <v-btn icon color="error" @click="deleteNote(note._id)">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </div>
-            </v-card>
-          </v-col>
-        </v-row>
+        <component :is="getCurrentComponent" @toast="showToast" />
       </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import { getNotes, createNote, deleteNote, updateNote } from '@/api/noteService';
+import { ref, computed } from 'vue';
+import { useTheme } from 'vuetify';
+import Sidebar from '@/components/Sidebar.vue';
+import NotesView from '@/components/NotesView.vue';
+import SettingsView from '@/components/SettingsView.vue';
 
 export default {
+  components: {
+    Sidebar,
+    NotesView,
+    SettingsView,
+  },
   setup() {
-    const notes = ref([]);
-    const newTitle = ref('');
-    const newContent = ref('');
+    const currentView = ref('notes');
 
-    const editingNoteId = ref(null);
-    const editTitle = ref('');
-    const editContent = ref('');
     const snackbar = ref({
       show: false,
       text: '',
@@ -82,78 +57,27 @@ export default {
       snackbar.value.show = true;
     };
 
-    const fetchNotes = async () => {
-      notes.value = await getNotes();
+    const theme = useTheme();
+    const isDark = computed(() => theme.global.name.value === 'dark');
+    const toggleTheme = () => {
+      theme.global.name.value = isDark.value ? 'light' : 'dark';
     };
 
-    const addNote = async () => {
-      const newNote = {
-        title: newTitle.value,
-        content: newContent.value,
+    const getCurrentComponent = computed(() => {
+      const views = {
+        notes: NotesView,
+        settings: SettingsView,
       };
-
-      if (!newNote.title.trim() || !newNote.content.trim()) {
-        showToast('Title and content required', 'error');
-        return;
-      }
-
-      await createNote(newNote);
-      await fetchNotes();
-      showToast('Note added!');
-      newTitle.value = '';
-      newContent.value = '';
-    };
-
-    const deleteNoteById = async (id) => {
-      await deleteNote(id);
-      await fetchNotes();
-      showToast('Note deleted', 'error');
-    };
-
-    const startEditing = (note) => {
-      editingNoteId.value = note._id;
-      editTitle.value = note.title;
-      editContent.value = note.content;
-    };
-
-    const cancelEdit = () => {
-      editingNoteId.value = null;
-      editTitle.value = '';
-      editContent.value = '';
-    };
-
-    const saveEdit = async () => {
-      if (!editTitle.value.trim() || !editContent.value.trim()) {
-        showToast('Title and content required', 'error');
-        return;
-      }
-      if (editingNoteId.value) {
-        await updateNote(editingNoteId.value, {
-          title: editTitle.value,
-          content: editContent.value,
-        });
-        await fetchNotes();
-        showToast('Note updated');
-        cancelEdit();
-      }
-    };
-
-    onMounted(fetchNotes);
+      return views[currentView.value] || NotesView;
+    });
 
     return {
-      notes,
-      newTitle,
-      newContent,
-      editingNoteId,
-      editTitle,
-      editContent,
-      addNote,
-      deleteNote: deleteNoteById,
-      startEditing,
-      cancelEdit,
-      saveEdit,
+      currentView,
       snackbar,
       showToast,
+      getCurrentComponent,
+      toggleTheme,
+      isDark,
     };
   },
 };
