@@ -1,6 +1,6 @@
-import axios from "axios";
+import axios from 'axios';
 
-const API_URL = "http://16.170.146.39:5000/api/notes"; //Note for future, Update this when deploying
+const API_URL = 'http://16.170.146.39:5000/api/notes'; //Note for future, Update this when deploying
 
 // Fetch all notes
 export const getNotes = async () => {
@@ -8,7 +8,7 @@ export const getNotes = async () => {
     const response = await axios.get(API_URL);
     return response.data;
   } catch (error) {
-    console.error("Error fetching notes:", error);
+    console.error('Error fetching notes:', error);
     return [];
   }
 };
@@ -19,7 +19,7 @@ export const createNote = async (note) => {
     const response = await axios.post(API_URL, note);
     return response.data;
   } catch (error) {
-    console.error("Error creating note:", error);
+    console.error('Error creating note:', error);
     return null;
   }
 };
