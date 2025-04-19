@@ -1,12 +1,8 @@
 import globals from "globals";
-import pluginJs from "@eslint/js";
 import pluginVue from "eslint-plugin-vue";
 import pluginPrettier from "eslint-plugin-prettier";
-import vueParser from "vue-eslint-parser";
 
-/** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
-  // Ignore common files and folders which could cause issues
   {
     ignores: [
       "node_modules/",
@@ -17,31 +13,26 @@ export default [
       "vite.config.js",
     ],
   },
-
-  // Main linting config
+  // Main linting configuration
   {
-    files: ["**/*.{js,mjs,cjs,vue}"],
+    files: ["**/*.{js,vue}"],
     languageOptions: {
-      parser: vueParser,
+      parser: require("vue-eslint-parser"),
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
-        ecmaFeatures: {
-          jsx: true, // Vue JSX enabled
-        },
       },
-      globals: {
-        ...globals.browser,
-        chrome: "readonly", // Chrome extension APIs
-        globalThis: "readonly",
-      },
+    },
+    globals: {
+      ...globals.browser,
+      chrome: "readonly", // Allow Chrome extension APIs
+      globalThis: "readonly",
     },
     plugins: {
       vue: pluginVue,
       prettier: pluginPrettier,
     },
     rules: {
-      ...pluginJs.configs.recommended.rules,
       ...pluginVue.configs["flat/recommended"].rules,
       "prettier/prettier": "warn",
       "vue/multi-word-component-names": "off",
