@@ -17,6 +17,11 @@
           <v-icon start>mdi-cog</v-icon>
           <v-list-item-title>Settings</v-list-item-title>
         </v-list-item>
+
+        <v-list-item @click="goToAuth">
+          <v-list-item-icon><v-icon>mdi-account</v-icon></v-list-item-icon>
+          <v-list-item-title>Account</v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
