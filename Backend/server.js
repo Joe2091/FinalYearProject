@@ -5,6 +5,7 @@ const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const verifyToken = require('./middleware/verifyToken');
 
 const allowedOrigins = [
   'chrome-extension://*', // Allows Chrome Extensions
@@ -56,7 +57,7 @@ app.get('/', (req, res) => {
 });
 
 // Create a New Note
-app.post('/api/notes', async (req, res) => {
+app.post('/api/notes', verifyToken, async (req, res) => {
   try {
     const { title, content } = req.body;
     const newNote = new Note({ title, content });
@@ -69,7 +70,7 @@ app.post('/api/notes', async (req, res) => {
 });
 
 // Get All Notes
-app.get('/api/notes', async (req, res) => {
+app.get('/api/notes', verifyToken, async (req, res) => {
   try {
     const notes = await Note.find();
     res.json(notes);
@@ -80,7 +81,7 @@ app.get('/api/notes', async (req, res) => {
 });
 
 // Update a Note
-app.put('/api/notes/:id', async (req, res) => {
+app.put('/api/notes/:id', verifyToken, async (req, res) => {
   const { title, content } = req.body;
 
   try {
@@ -97,7 +98,7 @@ app.put('/api/notes/:id', async (req, res) => {
 });
 
 // Delete a Note
-app.delete('/api/notes/:id', async (req, res) => {
+app.delete('/api/notes/:id', verifyToken, async (req, res) => {
   try {
     await Note.findByIdAndDelete(req.params.id);
     res.json({ message: 'Note deleted' });
