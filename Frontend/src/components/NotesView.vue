@@ -121,16 +121,24 @@ onMounted(fetchNotes);
         />
 
         <!-- Actions -->
-        <v-row justify="space-between" align-center class="mt-2 px-2 pb-2">
-          <v-btn icon size="small" density="compact" @click="toggleFavorite(note)">
-            <v-icon>{{ note.isFavorite ? 'mdi-star' : 'mdi-star-outline' }}</v-icon>
+        <v-row justify="space-between" align-center class="mt-2 px-6 pb-2">
+          <v-btn
+            icon
+            size="small"
+            :color="note.isFavorite ? 'yellow-darken-2' : 'grey-lighten-2'"
+            :variant="note.isFavorite ? 'elevated' : 'flat'"
+            @click="toggleFavorite(note)"
+          >
+            <v-icon :color="note.isFavorite ? 'white' : 'grey-darken-3'">
+              {{ note.isFavorite ? 'mdi-star' : 'mdi-star-outline' }}
+            </v-icon>
           </v-btn>
 
           <v-btn icon size="small" color="info" @click="summarizeNote(note)">
             <v-icon>mdi-lightbulb-outline</v-icon>
           </v-btn>
 
-          <v-btn icon color="error" size="small" density="compact" @click="deleteNoteById(note._id)">
+          <v-btn icon size="small" class="delete-btn" @click="deleteNoteById(note._id)">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </v-row>
@@ -156,5 +164,9 @@ onMounted(fetchNotes);
 }
 .title-wrapper {
   width: 100%;
+}
+.delete-btn {
+  background-color: #f44336 !important;
+  color: white !important;
 }
 </style>

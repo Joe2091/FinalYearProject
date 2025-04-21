@@ -1,3 +1,18 @@
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
+
+const drawer = ref(true);
+const authStore = useAuthStore();
+const router = useRouter();
+
+const logout = async () => {
+  await authStore.logout();
+  router.push('/login');
+};
+</script>
+
 <template>
   <v-app>
     <v-navigation-drawer app v-model="drawer" permanent>
@@ -18,10 +33,31 @@
           <v-list-item-title>Settings</v-list-item-title>
         </v-list-item>
 
-        <v-list-item @click="goToAuth">
-          <v-list-item-icon><v-icon>mdi-account</v-icon></v-list-item-icon>
-          <v-list-item-title>Account</v-list-item-title>
-        </v-list-item>
+        <v-divider class="my-2" />
+
+        <template v-if="!authStore.user">
+          <v-list-item to="/login" link>
+            <v-icon start>mdi-login</v-icon>
+            <v-list-item-title>Login</v-list-item-title>
+          </v-list-item>
+
+          <v-list-item to="/register" link>
+            <v-icon start>mdi-account-plus</v-icon>
+            <v-list-item-title>Register</v-list-item-title>
+          </v-list-item>
+        </template>
+
+        <template v-else>
+          <v-list-item to="/account" link>
+            <v-icon start>mdi-account</v-icon>
+            <v-list-item-title>Account</v-list-item-title>
+          </v-list-item>
+
+          <v-list-item @click="logout">
+            <v-icon start>mdi-logout</v-icon>
+            <v-list-item-title>Sign Out</v-list-item-title>
+          </v-list-item>
+        </template>
       </v-list>
     </v-navigation-drawer>
 
@@ -30,9 +66,3 @@
     </v-main>
   </v-app>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-
-const drawer = ref(true);
-</script>

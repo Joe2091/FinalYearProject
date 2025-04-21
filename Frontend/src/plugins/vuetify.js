@@ -24,10 +24,10 @@ const vuetify = createVuetify({
         colors: {
           background: '#121212',
           surface: '#1E1E1E',
-          primary: '#d69b04',
+          primary: '#4a02b0',
           secondary: '#B0BEC5',
           error: '#FF8A80',
-          info: '#80D8FF',
+          info: '#4a02b0',
           success: '#69F0AE',
           warning: '#FFD740',
         },
