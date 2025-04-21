@@ -1,19 +1,15 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
-import pluginPrettier from "eslint-plugin-prettier";
+import globals from 'globals';
+import pluginJs from '@eslint/js';
 
-/** @type {import('eslint').Linter.Config[]} */
 export default [
   {
-    files: ["**/*.js"],
+    files: ['**/*.js'],
     languageOptions: {
-      sourceType: "commonjs",
+      sourceType: 'commonjs',
       globals: globals.node,
     },
-    plugins: { prettier: pluginPrettier },
     rules: {
       ...pluginJs.configs.recommended.rules,
-      "prettier/prettier": "error",
     },
   },
 ];
