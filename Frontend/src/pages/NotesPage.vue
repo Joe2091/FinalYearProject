@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { getNotes, createNote, deleteNote, updateNote } from '@/api/noteService';
+import dayjs from 'dayjs';
 
 const emit = defineEmits(['toast']);
 
@@ -8,6 +9,19 @@ const notes = ref([]);
 const newTitle = ref('');
 const newContent = ref('');
 const editingTitleId = ref(null);
+const now = ref(dayjs());
+
+let timer = null;
+onMounted(() => {
+  fetchNotes();
+  timer = setInterval(() => {
+    now.value = dayjs();
+  }, 1000);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(timer);
+});
 
 const summarizeNote = (note) => {
   show(`Summarize clicked for "${note.title}"`, 'info');
@@ -48,17 +62,33 @@ const autoSave = async (note) => {
     content: note.content,
     isFavorite: note.isFavorite || false,
   });
+
+  note.updatedAt = dayjs().toISOString();
+
   show('Note saved');
 };
 
 const toggleFavorite = async (note) => {
   note.isFavorite = !note.isFavorite;
-  await updateNote(note._id, note);
+
+  note.updatedAt = dayjs().toISOString();
+
+  await updateNote(note._id, {
+    title: note.title,
+    content: note.content,
+    isFavorite: note.isFavorite,
+  });
+
   show(note.isFavorite ? 'Favorited!' : 'Unfavorited');
-  await fetchNotes();
 };
 
 onMounted(fetchNotes);
+const formatDate = (date) => {
+  const diff = now.value.diff(dayjs(date), 'minute');
+  if (diff < 1) return 'just now';
+  if (diff < 60) return `${diff} minutes ago`;
+  return dayjs(date).format('MMM D, YYYY h:mm A'); // fallback to absolute
+};
 </script>
 
 <template>
@@ -119,6 +149,8 @@ onMounted(fetchNotes);
           class="note-content"
           @blur="autoSave(note)"
         />
+
+        <small class="text-grey mt-1">Last updated: {{ formatDate(note.updatedAt) }}</small>
 
         <!-- Actions -->
         <v-row justify="space-between" align-center class="mt-2 px-6 pb-2">

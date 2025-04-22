@@ -42,12 +42,14 @@ mongoose
   .catch((err) => console.error('MongoDB Connection Error:', err));
 
 // Note Schema
-const noteSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  content: { type: String, required: true },
-  createdBy: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-});
+const noteSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    content: { type: String, required: true },
+    createdBy: { type: String, required: true },
+  },
+  { timestamps: true },
+);
 
 // Create Note Model
 const Note = mongoose.model('Note', noteSchema);
