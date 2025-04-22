@@ -1,4 +1,5 @@
 const { adminAuth } = require('../firebase/admin');
+const User = require('../models/User');
 
 const verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -11,7 +12,21 @@ const verifyToken = async (req, res, next) => {
 
   try {
     const decoded = await adminAuth.verifyIdToken(token);
-    req.user = decoded;
+    //console.log('Decoded token:', decoded); These logs were for debugging
+
+    let user = await User.findOne({ uid: decoded.uid });
+    if (!user) {
+      user = new User({
+        uid: decoded.uid,
+        email: decoded.email,
+      });
+      await user.save();
+      // console.log('New user created:', user);
+    } else {
+      // console.log('Existing user found:', user);
+    }
+
+    req.user = user;
     next();
   } catch (err) {
     console.error('Token verification failed:', err);

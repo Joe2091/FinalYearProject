@@ -45,6 +45,7 @@ mongoose
 const noteSchema = new mongoose.Schema({
   title: { type: String, required: true },
   content: { type: String, required: true },
+  createdBy: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -60,7 +61,13 @@ app.get('/', (req, res) => {
 app.post('/api/notes', verifyToken, async (req, res) => {
   try {
     const { title, content } = req.body;
-    const newNote = new Note({ title, content });
+
+    const newNote = new Note({
+      title,
+      content,
+      createdBy: req.user.uid,
+    });
+
     await newNote.save();
     res.status(201).json(newNote);
   } catch (error) {
@@ -72,7 +79,7 @@ app.post('/api/notes', verifyToken, async (req, res) => {
 // Get All Notes
 app.get('/api/notes', verifyToken, async (req, res) => {
   try {
-    const notes = await Note.find();
+    const notes = await Note.find({ createdBy: req.user.uid });
     res.json(notes);
   } catch (error) {
     console.error('Error fetching notes', error);
@@ -86,10 +93,16 @@ app.put('/api/notes/:id', verifyToken, async (req, res) => {
 
   try {
     const updatedNote = await Note.findByIdAndUpdate(
-      req.params.id,
+      { _id: req.params.id, createdBy: req.user.uid },
       { title, content },
       { new: true }, // Returns updated note
     );
+
+    if (!Note) {
+      return res
+        .status(404)
+        .json({ message: 'Note not found or unauthorized' });
+    }
     res.json(updatedNote);
   } catch (error) {
     console.error('Error updating note', error);
@@ -100,7 +113,17 @@ app.put('/api/notes/:id', verifyToken, async (req, res) => {
 // Delete a Note
 app.delete('/api/notes/:id', verifyToken, async (req, res) => {
   try {
-    await Note.findByIdAndDelete(req.params.id);
+    await Note.findByIdAndDelete({
+      _id: req.params.id,
+      createdBy: req.user.uid,
+    });
+
+    if (!Note) {
+      return res
+        .status(404)
+        .json({ message: 'Note not found or unauthorized' });
+    }
+
     res.json({ message: 'Note deleted' });
   } catch (error) {
     console.error('Error deleting note', error);
