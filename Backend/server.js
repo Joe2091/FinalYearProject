@@ -47,6 +47,7 @@ const noteSchema = new mongoose.Schema(
     title: { type: String, required: true },
     content: { type: String, required: true },
     createdBy: { type: String, required: true },
+    isFavorite: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
@@ -91,20 +92,21 @@ app.get('/api/notes', verifyToken, async (req, res) => {
 
 // Update a Note
 app.put('/api/notes/:id', verifyToken, async (req, res) => {
-  const { title, content } = req.body;
+  const { title, content, isFavorite } = req.body;
 
   try {
     const updatedNote = await Note.findByIdAndUpdate(
       { _id: req.params.id, createdBy: req.user.uid },
-      { title, content },
+      { title, content, isFavorite },
       { new: true }, // Returns updated note
     );
 
-    if (!Note) {
+    if (!updatedNote) {
       return res
         .status(404)
         .json({ message: 'Note not found or unauthorized' });
     }
+
     res.json(updatedNote);
   } catch (error) {
     console.error('Error updating note', error);
