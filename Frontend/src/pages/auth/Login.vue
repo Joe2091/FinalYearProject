@@ -22,23 +22,28 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/plugins/firebase';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/authStore';
+import { useToastStore } from '../../stores/toastStore';
 
 const email = ref('');
 const password = ref('');
 const error = ref('');
 const router = useRouter();
+const toast = useToastStore();
 
 const loginUser = async () => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
     const user = userCredential.user;
+
     const token = await user.getIdToken();
     console.log('User ID token:', token); //Update this Later on for Security
     const authStore = useAuthStore();
     await authStore.setUser(user);
+    toast.show('Logged in successfully!', 'success');
     router.push('/');
   } catch (err) {
     error.value = err.message;
+    toast.show(err.message, 'error');
   }
 };
 </script>

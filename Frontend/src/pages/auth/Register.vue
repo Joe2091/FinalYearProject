@@ -21,18 +21,22 @@ import { ref } from 'vue';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/plugins/firebase';
 import { useRouter } from 'vue-router';
+import { useToastStore } from '../../stores/toastStore';
 
 const email = ref('');
 const password = ref('');
 const error = ref('');
 const router = useRouter();
+const toast = useToastStore();
 
 const registerUser = async () => {
   try {
     await createUserWithEmailAndPassword(auth, email.value, password.value);
     router.push('/login');
+    toast.show('Created an Account Successfully!', 'success');
   } catch (err) {
     error.value = err.message;
+    toast.show(err.message, 'error');
   }
 };
 </script>
