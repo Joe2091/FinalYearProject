@@ -2,9 +2,9 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { getNotes, createNote, deleteNote, updateNote } from '@/api/noteService';
 import dayjs from 'dayjs';
+import { useToastStore } from '../stores/toastStore';
 
-const emit = defineEmits(['toast']);
-
+const toast = useToastStore();
 const notes = ref([]);
 const newTitle = ref('');
 const newContent = ref('');
@@ -28,7 +28,7 @@ const summarizeNote = (note) => {
   // note.content will be sent to Summarization API Later in Development
 };
 
-const show = (msg, color = 'success') => emit('toast', msg, color);
+const show = (msg, color = 'success') => toast.show(msg, color);
 
 const fetchNotes = async () => {
   notes.value = await getNotes();
@@ -79,7 +79,7 @@ const toggleFavorite = async (note) => {
     isFavorite: note.isFavorite,
   });
 
-  show(note.isFavorite ? 'Favorited!' : 'Unfavorited');
+  show(note.isFavorite ? 'Favorited Note' : 'Unfavorited Note');
 };
 
 onMounted(fetchNotes);
@@ -87,7 +87,7 @@ const formatDate = (date) => {
   const diff = now.value.diff(dayjs(date), 'minute');
   if (diff < 1) return 'just now';
   if (diff < 60) return `${diff} minutes ago`;
-  return dayjs(date).format('MMM D, YYYY h:mm A'); // fallback to absolute
+  return dayjs(date).format('MMM D, YYYY h:mm A');
 };
 </script>
 
@@ -103,7 +103,12 @@ const formatDate = (date) => {
   <!-- Notes grid -->
   <v-row>
     <v-col
-      v-for="note in [...notes].sort((a, b) => b.isFavorite - a.isFavorite).reverse()"
+      v-for="note in [...notes].sort((a, b) => {
+        if (b.isFavorite !== a.isFavorite) {
+          return b.isFavorite - a.isFavorite;
+        }
+        return new Date(b.updatedAt) - new Date(a.updatedAt);
+      })"
       :key="note._id"
       cols="12"
       sm="6"
