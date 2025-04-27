@@ -42,7 +42,7 @@ const logout = async () => {
     <v-snackbar
       v-model="toast.visible"
       :color="toast.color"
-      timeout="3000"
+      timeout="2000"
       location="top center"
       class="elevation-10 rounded-lg px-4"
     >
