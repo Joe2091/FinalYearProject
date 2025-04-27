@@ -31,6 +31,8 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 );
+// Note AI summary
+const summarizeRoute = require('./routes/summarize');
 
 // Connection to MongoDB
 mongoose
@@ -134,6 +136,8 @@ app.delete('/api/notes/:id', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Error deleting note' });
   }
 });
+
+app.use('/api/summarize', verifyToken, summarizeRoute);
 
 // Start Server
 app.listen(PORT, '0.0.0.0', () => {
