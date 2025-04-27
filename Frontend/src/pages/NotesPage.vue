@@ -3,7 +3,10 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { getNotes, createNote, deleteNote, updateNote } from '@/api/noteService';
 import dayjs from 'dayjs';
 import { useToastStore } from '../stores/toastStore';
+import axios from 'axios';
+import { getAuth } from 'firebase/auth';
 
+const auth = getAuth();
 const toast = useToastStore();
 const notes = ref([]);
 const newTitle = ref('');
@@ -23,9 +26,34 @@ onBeforeUnmount(() => {
   clearInterval(timer);
 });
 
-const summarizeNote = (note) => {
-  show(`Summarize clicked for "${note.title}"`, 'info');
-  // note.content will be sent to Summarization API Later in Development
+const summarizeNote = async (note) => {
+  try {
+    show(`Summarizing "${note.title}"...`, 'info');
+
+    const token = await auth.currentUser.getIdToken();
+
+    const response = await axios.post(
+      'http://localhost:5000/api/summarize',
+      { content: note.content },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const summary = response.data.summary;
+
+    note.content = summary;
+    await updateNote(note._id, {
+      title: note.title,
+      content: note.content,
+      isFavorite: note.isFavorite,
+    });
+
+    note.updatedAt = dayjs().toISOString();
+
+    show(`Note "${note.title}" summarized and updated!`, 'success');
+  } catch (error) {
+    console.error('Error summarizing note:', error);
+    show('Error summarizing note', 'error');
+  }
 };
 
 const show = (msg, color = 'success') => toast.show(msg, color);
