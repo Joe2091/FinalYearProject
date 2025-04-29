@@ -31,8 +31,10 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 );
-// Note AI summary
+// Routes Required
 const summarizeRoute = require('./routes/summarize');
+const chatRoute = require('./routes/chat');
+const userChatsRoutes = require('./routes/userChats');
 
 // Connection to MongoDB
 mongoose
@@ -138,6 +140,8 @@ app.delete('/api/notes/:id', verifyToken, async (req, res) => {
 });
 
 app.use('/api/summarize', verifyToken, summarizeRoute);
+app.use('/api/chat', verifyToken, chatRoute);
+app.use('/api', userChatsRoutes);
 
 // Start Server
 app.listen(PORT, '0.0.0.0', () => {
