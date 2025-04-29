@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from './stores/toastStore';
@@ -13,7 +13,12 @@ const savedTheme = localStorage.getItem('theme');
 if (savedTheme) {
   theme.global.name.value = savedTheme;
 }
-
+const isExtension = window.location.protocol === 'chrome-extension:';
+onMounted(() => {
+  if (isExtension) {
+    router.replace('/'); // Redirect back to home
+  }
+});
 const toggleTheme = () => {
   const newTheme = isDark.value ? 'light' : 'dark';
   theme.global.name.value = newTheme;
@@ -78,6 +83,20 @@ const logout = async () => {
           <v-icon start>mdi-note</v-icon>
           <v-list-item-title v-if="!isCollapsed">Notes</v-list-item-title>
         </v-list-item>
+
+        <template v-if="!isExtension">
+          <v-list-item
+            link
+            to="/chat"
+            :class="[
+              $route.path === '/chat' ? (isDark ? 'active-item-dark' : 'active-item-light') : '',
+              $route.path === '/chat' ? 'no-hover' : '',
+            ]"
+          >
+            <v-icon start>mdi-message-text</v-icon>
+            <v-list-item-title v-if="!isCollapsed">ChatBot</v-list-item-title>
+          </v-list-item>
+        </template>
 
         <v-list-item
           link
