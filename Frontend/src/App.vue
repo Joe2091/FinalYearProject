@@ -84,6 +84,18 @@ const logout = async () => {
           <v-list-item-title v-if="!isCollapsed">Notes</v-list-item-title>
         </v-list-item>
 
+        <v-list-item
+          link
+          to="/reminder"
+          :class="[
+            $route.path === '/reminder' ? (isDark ? 'active-item-dark' : 'active-item-light') : '',
+            $route.path === '/reminder' ? 'no-hover' : '',
+          ]"
+        >
+          <v-icon start>mdi-bell</v-icon>
+          <v-list-item-title v-if="!isCollapsed">Reminders</v-list-item-title>
+        </v-list-item>
+
         <template v-if="!isExtension">
           <v-list-item
             link

@@ -1,0 +1,37 @@
+const { EmailClient } = require('@azure/communication-email');
+require('dotenv').config();
+
+const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING;
+const emailClient = new EmailClient(connectionString);
+
+async function sendReminderEmail(to, subject, body, htmlBody) {
+  const message = {
+    senderAddress: process.env.AZURE_SENDER_EMAIL,
+    content: {
+      subject,
+      plainText: body,
+      html:
+        htmlBody ||
+        `
+         <h2 style="color: #6a1b9a;">Reminder: ${subject}</h2>
+         <p><strong>Due:</strong> ${new Date().toLocaleString()}</p>
+        <p>${body.replace(/\n/g, '<br>')}</p>
+        <hr />
+        <footer style="font-size: 12px; color: #888;">Sent by Notemax</footer>
+        `,
+    },
+    recipients: {
+      to: [{ address: to, displayName: 'Reminder Recipient' }],
+    },
+  };
+
+  try {
+    const poller = await emailClient.beginSend(message);
+    const response = await poller.pollUntilDone();
+    console.log('Email send status:', response.status);
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
+}
+
+module.exports = { sendReminderEmail };

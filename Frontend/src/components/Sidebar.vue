@@ -2,7 +2,7 @@
   <v-snackbar
     v-model="toast.visible"
     :color="toast.color"
-    timeout="1500"
+    timeout="1700"
     location="top center"
     class="elevation-10 rounded-lg px-4"
   >
@@ -39,6 +39,18 @@
       >
         <v-icon start>mdi-note</v-icon>
         <v-list-item-title v-if="!isCollapsed">Notes</v-list-item-title>
+      </v-list-item>
+
+      <v-list-item
+        link
+        to="/reminder"
+        :class="[
+          $route.path === '/reminder' ? (isDark ? 'active-item-dark' : 'active-item-light') : '',
+          $route.path === '/reminder' ? 'no-hover' : '',
+        ]"
+      >
+        <v-icon start>mdi-bell</v-icon>
+        <v-list-item-title v-if="!isCollapsed">Reminders</v-list-item-title>
       </v-list-item>
 
       <v-list-item

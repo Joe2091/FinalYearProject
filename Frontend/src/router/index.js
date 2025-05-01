@@ -8,6 +8,7 @@ const routes = [
   { path: '/account', component: () => import('@/pages/AccountPage.vue'), meta: { requiresAuth: true } },
   { path: '/chat', component: () => import('@/pages/ChatPage.vue'), meta: { requiresAuth: true } },
   { path: '/', component: () => import('@/pages/NotesPage.vue'), meta: { requiresAuth: true } },
+  { path: '/reminder', component: () => import('@/pages/RemindersPage.vue'), meta: { requiresAuth: true } },
   { path: '/settings', component: () => import('@/pages/SettingsPage.vue'), meta: { requiresAuth: true } },
 ];
 

@@ -35,13 +35,12 @@ app.use(
 const summarizeRoute = require('./routes/summarize');
 const chatRoute = require('./routes/chat');
 const userChatsRoutes = require('./routes/userChats');
+const remindersRoute = require('./routes/reminders');
+require('./services/reminderScheduler');
 
 // Connection to MongoDB
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URI, {})
   .then(() => console.log('MongoDB Connected'))
   .catch((err) => console.error('MongoDB Connection Error:', err));
 
@@ -141,6 +140,7 @@ app.delete('/api/notes/:id', verifyToken, async (req, res) => {
 
 app.use('/api/summarize', verifyToken, summarizeRoute);
 app.use('/api/chat', verifyToken, chatRoute);
+app.use('/api/reminders', remindersRoute);
 app.use('/api', userChatsRoutes);
 
 // Start Server
