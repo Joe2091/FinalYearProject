@@ -9,7 +9,7 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["storage"],
+  "permissions": ["storage", "notifications"],
   "host_permissions": ["https://*/*"],
   "content_scripts": [
     {

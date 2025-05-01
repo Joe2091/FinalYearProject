@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@azure/communication-email": "^1.0.0",
     "axios": "^1.9.0",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
