@@ -120,96 +120,98 @@ const formatDate = (date) => {
 </script>
 
 <template>
-  <!-- Create new note -->
-  <v-card class="pa-4 mb-4">
-    <v-card-title>NoteMAX</v-card-title>
-    <v-text-field v-model="newTitle" label="Title" dense outlined />
-    <v-textarea v-model="newContent" label="Content" dense outlined />
-    <v-btn color="primary" class="mt-2" @click="addNote">Add Note</v-btn>
-  </v-card>
+  <v-container fluid class="notes-page-container">
+    <!-- Create new note -->
+    <v-card class="pa-4 mb-4">
+      <v-card-title>NoteMAX</v-card-title>
+      <v-text-field v-model="newTitle" label="Title" dense outlined />
+      <v-textarea v-model="newContent" label="Content" dense outlined />
+      <v-btn color="primary" class="mt-2" @click="addNote">Add Note</v-btn>
+    </v-card>
 
-  <!-- Notes grid -->
-  <v-row>
-    <v-col
-      v-for="note in [...notes].sort((a, b) => {
-        if (b.isFavorite !== a.isFavorite) {
-          return b.isFavorite - a.isFavorite;
-        }
-        return new Date(b.updatedAt) - new Date(a.updatedAt);
-      })"
-      :key="note._id"
-      cols="12"
-      sm="6"
-      md="4"
-    >
-      <v-card class="pa-2 d-flex flex-column justify-space-between" style="min-height: 180px">
-        <div class="title-wrapper" @click="editingTitleId = note._id">
-          <template v-if="editingTitleId === note._id">
-            <v-text-field
-              v-model="note.title"
-              variant="plain"
-              autofocus
-              dense
-              hide-details
-              class="mb-2"
-              @blur="
-                () => {
-                  autoSave(note);
-                  editingTitleId = null;
-                }
-              "
-            />
-          </template>
-          <template v-else>
-            <v-tooltip location="top">
-              <template #activator="{ props }">
-                <div class="truncated-title" v-bind="props">
-                  {{ note.title }}
-                </div>
-              </template>
-              <span>{{ note.title }}</span>
-            </v-tooltip>
-          </template>
-        </div>
+    <!-- Notes grid -->
+    <v-row>
+      <v-col
+        v-for="note in [...notes].sort((a, b) => {
+          if (b.isFavorite !== a.isFavorite) {
+            return b.isFavorite - a.isFavorite;
+          }
+          return new Date(b.updatedAt) - new Date(a.updatedAt);
+        })"
+        :key="note._id"
+        cols="12"
+        sm="6"
+        md="4"
+      >
+        <v-card class="pa-2 d-flex flex-column justify-space-between" style="min-height: 180px">
+          <div class="title-wrapper" @click="editingTitleId = note._id">
+            <template v-if="editingTitleId === note._id">
+              <v-text-field
+                v-model="note.title"
+                variant="plain"
+                autofocus
+                dense
+                hide-details
+                class="mb-2"
+                @blur="
+                  () => {
+                    autoSave(note);
+                    editingTitleId = null;
+                  }
+                "
+              />
+            </template>
+            <template v-else>
+              <v-tooltip location="top">
+                <template #activator="{ props }">
+                  <div class="truncated-title" v-bind="props">
+                    {{ note.title }}
+                  </div>
+                </template>
+                <span>{{ note.title }}</span>
+              </v-tooltip>
+            </template>
+          </div>
 
-        <!-- Content -->
-        <v-textarea
-          v-model="note.content"
-          placeholder="Start typing..."
-          variant="plain"
-          rows="3"
-          auto-grow
-          class="note-content"
-          @blur="autoSave(note)"
-        />
+          <!-- Content -->
+          <v-textarea
+            v-model="note.content"
+            placeholder="Start typing..."
+            variant="plain"
+            rows="3"
+            auto-grow
+            class="note-content"
+            @blur="autoSave(note)"
+          />
 
-        <small class="text-grey mt-1">Last updated: {{ formatDate(note.updatedAt) }}</small>
+          <small class="text-grey mt-1">Last updated: {{ formatDate(note.updatedAt) }}</small>
 
-        <!-- Actions -->
-        <v-row justify="space-between" align-center class="mt-2 px-6 pb-2">
-          <v-btn
-            icon
-            size="small"
-            :color="note.isFavorite ? 'yellow-darken-2' : 'grey-lighten-2'"
-            :variant="note.isFavorite ? 'elevated' : 'flat'"
-            @click="toggleFavorite(note)"
-          >
-            <v-icon :color="note.isFavorite ? 'white' : 'grey-darken-3'">
-              {{ note.isFavorite ? 'mdi-star' : 'mdi-star-outline' }}
-            </v-icon>
-          </v-btn>
+          <!-- Actions -->
+          <v-row justify="space-between" align-center class="mt-2 px-6 pb-2">
+            <v-btn
+              icon
+              size="small"
+              :color="note.isFavorite ? 'yellow-darken-2' : 'grey-lighten-2'"
+              :variant="note.isFavorite ? 'elevated' : 'flat'"
+              @click="toggleFavorite(note)"
+            >
+              <v-icon :color="note.isFavorite ? 'white' : 'grey-darken-3'">
+                {{ note.isFavorite ? 'mdi-star' : 'mdi-star-outline' }}
+              </v-icon>
+            </v-btn>
 
-          <v-btn icon size="small" color="info" @click="summarizeNote(note)">
-            <v-icon>mdi-lightbulb-outline</v-icon>
-          </v-btn>
+            <v-btn icon size="small" color="info" @click="summarizeNote(note)">
+              <v-icon>mdi-lightbulb-outline</v-icon>
+            </v-btn>
 
-          <v-btn icon size="small" class="delete-btn" @click="deleteNoteById(note._id)">
-            <v-icon>mdi-delete</v-icon>
-          </v-btn>
-        </v-row>
-      </v-card>
-    </v-col>
-  </v-row>
+            <v-btn icon size="small" class="delete-btn" @click="deleteNoteById(note._id)">
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </v-row>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <style scoped>
