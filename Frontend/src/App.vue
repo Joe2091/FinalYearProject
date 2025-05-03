@@ -7,7 +7,7 @@ import { useTheme } from 'vuetify';
 
 defineProps(['isDark']);
 const theme = useTheme();
-const isDark = computed(() => theme.global.name.value === 'dark'); // Detect current theme
+const isDark = computed(() => theme.global.name.value === 'dark');
 
 const savedTheme = localStorage.getItem('theme');
 if (savedTheme) {

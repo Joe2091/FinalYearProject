@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { getNotes, createNote, deleteNote, updateNote } from '@/api/noteService';
 import dayjs from 'dayjs';
 import { useToastStore } from '../stores/toastStore';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
+import { useTheme } from 'vuetify';
 
 const auth = getAuth();
 const toast = useToastStore();
@@ -13,6 +14,8 @@ const newTitle = ref('');
 const newContent = ref('');
 const editingTitleId = ref(null);
 const now = ref(dayjs());
+const theme = useTheme();
+const isDark = computed(() => theme.global.name.value === 'dark');
 
 let timer = null;
 onMounted(() => {
@@ -120,96 +123,107 @@ const formatDate = (date) => {
 </script>
 
 <template>
-  <!-- Create new note -->
-  <v-card class="pa-4 mb-4">
-    <v-card-title>NoteMAX</v-card-title>
-    <v-text-field v-model="newTitle" label="Title" dense outlined />
-    <v-textarea v-model="newContent" label="Content" dense outlined />
-    <v-btn color="primary" class="mt-2" @click="addNote">Add Note</v-btn>
-  </v-card>
+  <v-container fluid class="notes-page-container">
+    <!-- Create new note -->
+    <v-card class="pa-4 mb-4">
+      <v-card-title>NoteMAX</v-card-title>
+      <v-text-field v-model="newTitle" label="Title" dense outlined />
+      <v-textarea v-model="newContent" label="Content" dense outlined />
+      <v-btn color="primary" class="mt-2" @click="addNote">Add Note</v-btn>
+    </v-card>
 
-  <!-- Notes grid -->
-  <v-row>
-    <v-col
-      v-for="note in [...notes].sort((a, b) => {
-        if (b.isFavorite !== a.isFavorite) {
-          return b.isFavorite - a.isFavorite;
-        }
-        return new Date(b.updatedAt) - new Date(a.updatedAt);
-      })"
-      :key="note._id"
-      cols="12"
-      sm="6"
-      md="4"
-    >
-      <v-card class="pa-2 d-flex flex-column justify-space-between" style="min-height: 180px">
-        <div class="title-wrapper" @click="editingTitleId = note._id">
-          <template v-if="editingTitleId === note._id">
-            <v-text-field
-              v-model="note.title"
-              variant="plain"
-              autofocus
-              dense
-              hide-details
-              class="mb-2"
-              @blur="
-                () => {
-                  autoSave(note);
-                  editingTitleId = null;
-                }
-              "
-            />
-          </template>
-          <template v-else>
-            <v-tooltip location="top">
-              <template #activator="{ props }">
-                <div class="truncated-title" v-bind="props">
-                  {{ note.title }}
-                </div>
-              </template>
-              <span>{{ note.title }}</span>
-            </v-tooltip>
-          </template>
-        </div>
+    <!-- Notes grid -->
+    <v-row>
+      <v-col
+        v-for="note in [...notes].sort((a, b) => {
+          if (b.isFavorite !== a.isFavorite) {
+            return b.isFavorite - a.isFavorite;
+          }
+          return new Date(b.updatedAt) - new Date(a.updatedAt);
+        })"
+        :key="note._id"
+        cols="12"
+        sm="6"
+        md="4"
+      >
+        <v-card class="pa-2 d-flex flex-column justify-space-between" style="min-height: 180px">
+          <div class="title-wrapper" @click="editingTitleId = note._id">
+            <template v-if="editingTitleId === note._id">
+              <v-text-field
+                v-model="note.title"
+                variant="plain"
+                autofocus
+                dense
+                hide-details
+                class="mb-2"
+                @blur="
+                  () => {
+                    autoSave(note);
+                    editingTitleId = null;
+                  }
+                "
+              />
+            </template>
+            <template v-else>
+              <v-tooltip location="top">
+                <template #activator="{ props }">
+                  <div class="truncated-title" v-bind="props">
+                    {{ note.title }}
+                  </div>
+                </template>
+                <span>{{ note.title }}</span>
+              </v-tooltip>
+            </template>
+          </div>
 
-        <!-- Content -->
-        <v-textarea
-          v-model="note.content"
-          placeholder="Start typing..."
-          variant="plain"
-          rows="3"
-          auto-grow
-          class="note-content"
-          @blur="autoSave(note)"
-        />
-
-        <small class="text-grey mt-1">Last updated: {{ formatDate(note.updatedAt) }}</small>
-
-        <!-- Actions -->
-        <v-row justify="space-between" align-center class="mt-2 px-6 pb-2">
-          <v-btn
-            icon
-            size="small"
-            :color="note.isFavorite ? 'yellow-darken-2' : 'grey-lighten-2'"
-            :variant="note.isFavorite ? 'elevated' : 'flat'"
-            @click="toggleFavorite(note)"
+          <!-- Content -->
+          <v-textarea
+            v-model="note.content"
+            placeholder="Start typing..."
+            variant="plain"
+            rows="3"
+            auto-grow
+            class="note-content"
+            @blur="autoSave(note)"
+          />
+          <div class="timestamp">
+            <small class="text-grey mt-1">Last updated: {{ formatDate(note.updatedAt) }}</small>
+          </div>
+          <!-- Actions -->
+          <v-row
+            justify="space-between"
+            align-center
+            class="note-actions"
+            :style="{
+              borderTop: '1px solid',
+              borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
+              backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.03)',
+            }"
           >
-            <v-icon :color="note.isFavorite ? 'white' : 'grey-darken-3'">
-              {{ note.isFavorite ? 'mdi-star' : 'mdi-star-outline' }}
-            </v-icon>
-          </v-btn>
+            <v-btn
+              icon
+              size="small"
+              :color="note.isFavorite ? 'yellow-darken-2' : 'grey-lighten-2'"
+              :variant="note.isFavorite ? 'elevated' : 'flat'"
+              @click="toggleFavorite(note)"
+            >
+              <v-icon :color="note.isFavorite ? 'white' : 'grey-darken-3'">
+                {{ note.isFavorite ? 'mdi-star' : 'mdi-star-outline' }}
+              </v-icon>
+            </v-btn>
 
-          <v-btn icon size="small" color="info" @click="summarizeNote(note)">
-            <v-icon>mdi-lightbulb-outline</v-icon>
-          </v-btn>
+            <v-btn icon size="small" color="info" @click="summarizeNote(note)">
+              <v-icon>mdi-lightbulb-outline</v-icon>
+            </v-btn>
 
-          <v-btn icon size="small" class="delete-btn" @click="deleteNoteById(note._id)">
-            <v-icon>mdi-delete</v-icon>
-          </v-btn>
-        </v-row>
-      </v-card>
-    </v-col>
-  </v-row>
+            <v-btn icon size="small" class="delete-btn" @click="deleteNoteById(note._id)">
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </v-row>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <style scoped>
@@ -233,5 +247,15 @@ const formatDate = (date) => {
 .delete-btn {
   background-color: #f44336 !important;
   color: white !important;
+}
+
+.note-actions {
+  padding: 12px 24px;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.timestamp {
+  margin: 11px;
 }
 </style>
