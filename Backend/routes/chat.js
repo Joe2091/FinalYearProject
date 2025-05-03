@@ -11,12 +11,28 @@ const apiKey = process.env.AZURE_OPENAI_CHATBOT_API_KEY;
 router.post('/', verifyToken, async (req, res) => {
   const { messages } = req.body;
 
+  const systemPrompt = {
+    role: 'system',
+    content: `
+  You are a helpful assistant that formats replies with clear Markdown.
+
+- Use **lists** (numbered or bullets) when the user asks for steps, points, or explanations.
+- Use **paragraphs** for storytelling, summaries, or descriptive responses.
+- Emphasize key terms using **bold** or _italic_.
+- Always use line breaks between paragraphs or list items for readability.
+
+If the user asks for a story or narrative, respond in flowing paragraphs instead of lists.
+  `,
+  };
+
+  const updatedMessages = [systemPrompt, ...messages];
+
   try {
     const response = await axios.post(
       `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`,
       {
-        messages,
-        max_tokens: 500,
+        messages: updatedMessages,
+        max_tokens: 750,
         temperature: 0.7,
       },
       {
