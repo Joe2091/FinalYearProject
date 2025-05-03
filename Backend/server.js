@@ -6,6 +6,8 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const verifyToken = require('./middleware/verifyToken');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const allowedOrigins = [
   'chrome-extension://*', // Allows Chrome Extensions
@@ -143,7 +145,20 @@ app.use('/api/chat', verifyToken, chatRoute);
 app.use('/api/reminders', remindersRoute);
 app.use('/api', userChatsRoutes);
 
-// Start Server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
+// Server created with Socket.io Attached
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
+
+require('./sockets/notesSocket')(io);
+
+// Server Start
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server with WebSocket running on http://0.0.0.0:${PORT}`);
 });
