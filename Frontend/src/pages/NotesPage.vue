@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { getNotes, createNote, deleteNote, updateNote } from '@/api/noteService';
 import dayjs from 'dayjs';
 import { useToastStore } from '../stores/toastStore';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
+import { useTheme } from 'vuetify';
 
 const auth = getAuth();
 const toast = useToastStore();
@@ -13,6 +14,8 @@ const newTitle = ref('');
 const newContent = ref('');
 const editingTitleId = ref(null);
 const now = ref(dayjs());
+const theme = useTheme();
+const isDark = computed(() => theme.global.name.value === 'dark');
 
 let timer = null;
 onMounted(() => {
@@ -183,11 +186,20 @@ const formatDate = (date) => {
             class="note-content"
             @blur="autoSave(note)"
           />
-
-          <small class="text-grey mt-1">Last updated: {{ formatDate(note.updatedAt) }}</small>
-
+          <div class="timestamp">
+            <small class="text-grey mt-1">Last updated: {{ formatDate(note.updatedAt) }}</small>
+          </div>
           <!-- Actions -->
-          <v-row justify="space-between" align-center class="mt-2 px-6 pb-2">
+          <v-row
+            justify="space-between"
+            align-center
+            class="note-actions"
+            :style="{
+              borderTop: '1px solid',
+              borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
+              backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.03)',
+            }"
+          >
             <v-btn
               icon
               size="small"
@@ -235,5 +247,15 @@ const formatDate = (date) => {
 .delete-btn {
   background-color: #f44336 !important;
   color: white !important;
+}
+
+.note-actions {
+  padding: 12px 24px;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.timestamp {
+  margin: 11px;
 }
 </style>
