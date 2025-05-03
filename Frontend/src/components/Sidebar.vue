@@ -55,6 +55,18 @@
 
       <v-list-item
         link
+        to="/chat"
+        :class="[
+          $route.path === '/chat' ? (isDark ? 'active-item-dark' : 'active-item-light') : '',
+          $route.path === '/chat' ? 'no-hover' : '',
+        ]"
+      >
+        <v-icon start>mdi-message-text</v-icon>
+        <v-list-item-title v-if="!isCollapsed">Chatbot</v-list-item-title>
+      </v-list-item>
+
+      <v-list-item
+        link
         to="/settings"
         :class="[
           $route.path === '/settings' ? (isDark ? 'active-item-dark' : 'active-item-light') : '',

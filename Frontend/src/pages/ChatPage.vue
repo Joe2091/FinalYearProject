@@ -1,164 +1,32 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import axios from 'axios';
-import { getAuth } from 'firebase/auth';
+import { computed } from 'vue';
 import { useTheme } from 'vuetify';
+import { useChatbot } from '@/composables/useChatbot';
 
 const theme = useTheme();
 const isDark = computed(() => theme.global.name.value === 'dark');
-const chats = ref([]);
-const currentChatId = ref(null);
-const menuChatId = ref(null);
 
-const renameDialog = ref(false);
-const renameChatId = ref(null);
-const chatNameInput = ref('');
-const userInput = ref('');
-const loading = ref(false);
-
-const messages = computed(() => {
-  return chats.value.find((chat) => chat.id === currentChatId.value)?.messages || [];
-});
-
-async function fetchChats() {
-  try {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) throw new Error('User not authenticated');
-
-    const token = await user.getIdToken();
-
-    const res = await axios.get('http://localhost:5000/api/getChats', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (res.data && res.data.length > 0) {
-      chats.value = res.data;
-      currentChatId.value = res.data[0]?.id || null;
-    } else {
-      createNewChat();
-    }
-  } catch (error) {
-    console.error('Error loading chats:', error);
-    createNewChat();
-  }
-}
-
-async function saveChats() {
-  try {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const token = await user.getIdToken();
-
-    await axios.post(
-      'http://localhost:5000/api/saveChats',
-      { chats: chats.value },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-  } catch (error) {
-    console.error('Error saving chats:', error);
-  }
-}
-
-onMounted(async () => {
-  loading.value = true;
-  await fetchChats();
-  loading.value = false;
-});
-
-watch(
+const {
   chats,
-  async () => {
-    await saveChats();
-  },
-  { deep: true }
-);
-
-function createNewChat() {
-  const newChat = {
-    id: Date.now().toString(),
-    name: `Chat ${chats.value.length + 1}`,
-    messages: [{ role: 'assistant', content: 'How can I help?' }],
-    createdAt: new Date(),
-  };
-  chats.value.push(newChat);
-  currentChatId.value = newChat.id;
-}
-
-function selectChat(id) {
-  currentChatId.value = id;
-}
-
-function openRenameDialog(id) {
-  const chat = chats.value.find((c) => c.id === id);
-  if (!chat) return;
-  chatNameInput.value = chat.name;
-  renameChatId.value = id;
-  renameDialog.value = true;
-  menuChatId.value = null;
-}
-
-function confirmRename() {
-  const chat = chats.value.find((c) => c.id === renameChatId.value);
-  if (chat && chatNameInput.value.trim() !== '') {
-    chat.name = chatNameInput.value.trim();
-  }
-  renameDialog.value = false;
-  renameChatId.value = null;
-}
-
-function deleteChat(id) {
-  chats.value = chats.value.filter((chat) => chat.id !== id);
-  if (currentChatId.value === id) {
-    currentChatId.value = chats.value[0]?.id || null;
-  }
-  menuChatId.value = null;
-}
-
-const sendMessage = async () => {
-  if (userInput.value.trim() !== '') {
-    const chat = chats.value.find((c) => c.id === currentChatId.value);
-    if (!chat) return;
-
-    chat.messages.push({ role: 'user', content: userInput.value });
-
-    const userMessage = userInput.value;
-    userInput.value = '';
-
-    try {
-      const auth = getAuth();
-      const user = auth.currentUser;
-
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      const token = await user.getIdToken();
-
-      const response = await axios.post(
-        'http://localhost:5000/api/chat',
-        { messages: chat.messages },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      chat.messages.push({ role: 'assistant', content: response.data.content });
-    } catch (error) {
-      console.error('Error getting chatbot response:', error);
-      chat.messages.push({
-        role: 'assistant',
-        content: 'Sorry, there was an error. Please try again later.',
-      });
-    }
-  }
-};
+  currentChatId,
+  renameDialog,
+  chatNameInput,
+  userInput,
+  loading,
+  chatContainer,
+  showScrollToBottom,
+  md,
+  sidebarCollapsed,
+  messages,
+  toggleSidebar,
+  createNewChat,
+  selectChat,
+  openRenameDialog,
+  confirmRename,
+  deleteChat,
+  scrollToBottom,
+  sendMessage,
+} = useChatbot();
 </script>
 
 <template>
@@ -167,10 +35,22 @@ const sendMessage = async () => {
     <v-sheet
       class="chat-sidebar"
       :color="isDark ? 'surface' : 'grey-lighten-3'"
-      width="250"
-      style="padding: 1rem; display: flex; flex-direction: column"
+      :width="sidebarCollapsed ? 55 : 250"
+      style="
+        transition:
+          width 0.3s ease,
+          padding 0.3s ease;
+        overflow-x: hidden;
+      "
     >
-      <div style="display: flex; justify-content: flex-start; margin-bottom: 1rem">
+      <div style="display: flex; justify-content: center; margin-bottom: 8px; padding-top: 5px">
+        <v-btn icon size="small" @click="toggleSidebar" style="margin-bottom: 8px">
+          <v-icon>{{ sidebarCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
+        </v-btn>
+      </div>
+
+      <v-divider class="my-2"></v-divider>
+      <div style="display: flex; justify-content: center; margin-bottom: 8px; padding-top: 5px">
         <v-btn icon color="primary" @click="createNewChat" size="small">
           <v-icon>mdi-plus</v-icon>
         </v-btn>
@@ -187,7 +67,23 @@ const sendMessage = async () => {
             style="background-color: transparent; box-shadow: none"
           >
             <v-list-item-title style="display: flex; align-items: center; justify-content: space-between; width: 100%">
-              <span>{{ chat.name }}</span>
+              <v-tooltip location="top">
+                <template #activator="{ props }">
+                  <span
+                    v-bind="props"
+                    style="
+                      overflow: hidden;
+                      white-space: nowrap;
+                      text-overflow: ellipsis;
+                      max-width: 160px;
+                      display: inline-block;
+                    "
+                  >
+                    {{ chat.name }}
+                  </span>
+                </template>
+                <span>{{ chat.name }}</span>
+              </v-tooltip>
 
               <v-menu :close-on-content-click="false" offset-y>
                 <template #activator="{ props }">
@@ -230,7 +126,7 @@ const sendMessage = async () => {
         <v-progress-circular indeterminate size="64" color="primary"></v-progress-circular>
       </v-overlay>
       <!-- Chat Messages -->
-      <div class="chat-messages" style="flex: 1; overflow-y: auto; padding: 1rem">
+      <div ref="chatContainer" class="chat-messages" style="flex: 1; overflow-y: auto; padding: 1rem">
         <div
           v-for="(message, index) in messages"
           :key="index"
@@ -249,16 +145,19 @@ const sendMessage = async () => {
                   : 'assistant-bubble-light',
             ]"
           >
-            {{ message.content }}
+            <div class="markdown" v-html="md.render(message.content)"></div>
           </div>
         </div>
+        <v-btn v-if="showScrollToBottom" @click="scrollToBottom" icon color="primary" class="scroll-to-bottom">
+          <v-icon>mdi-arrow-down</v-icon>
+        </v-btn>
       </div>
 
       <!-- Chat Input -->
       <div class="chat-input-container" style="padding: 1rem">
         <v-row justify="center">
           <v-col cols="12" md="8" lg="6">
-            <v-text-field
+            <v-textarea
               v-model="userInput"
               label="Type your message..."
               append-icon="mdi-send"
@@ -267,6 +166,9 @@ const sendMessage = async () => {
               dense
               outlined
               class="chat-input"
+              rows="1"
+              auto-grow
+              max-rows="3"
             />
           </v-col>
         </v-row>
@@ -277,7 +179,11 @@ const sendMessage = async () => {
 
 <style scoped>
 .chatbot-container {
-  height: 100vh;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
 }
 
 .chat-messages {
@@ -287,13 +193,17 @@ const sendMessage = async () => {
 }
 
 .chat-bubble {
-  padding: 0.75rem 1rem;
-  margin: 0.25rem;
+  padding: 1rem 1.25rem;
+  margin: 0.5rem;
   border-radius: 18px;
-  max-width: 60%;
+  max-width: min(85vw, 550px);
   word-break: break-word;
   font-size: 1rem;
-  line-height: 1.4;
+  line-height: 1.5;
+}
+
+.chat-bubble .markdown {
+  padding-left: 0.5rem;
 }
 
 .user-bubble-light {
@@ -314,16 +224,6 @@ const sendMessage = async () => {
 .assistant-bubble-dark {
   background-color: #33691e;
   color: #f1f8e9;
-}
-
-.chatbot-container {
-  height: 100vh;
-}
-
-.chat-messages {
-  flex-grow: 1;
-  padding: 1rem;
-  overflow-y: auto;
 }
 
 .chat-input-container {
@@ -356,5 +256,13 @@ const sendMessage = async () => {
 .no-outline:active {
   background-color: transparent !important;
   box-shadow: none !important;
+}
+
+.scroll-to-bottom {
+  position: fixed;
+  bottom: 80px;
+  right: 24px;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 </style>
