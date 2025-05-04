@@ -11,6 +11,8 @@ import { useSocket } from '../composables/useSocket';
 const {
   socket,
   joinNote,
+  onNoteCreated,
+  emitNoteCreated,
   emitNoteUpdate,
   onNoteUpdate,
   emitNoteDeleted,
@@ -34,6 +36,13 @@ onMounted(() => {
   timer = setInterval(() => {
     now.value = dayjs();
   }, 1000);
+
+  onNoteCreated((note) => {
+    if (!notes.value.some((n) => n._id === note._id)) {
+      notes.value.push(note);
+      joinNote(note._id);
+    }
+  });
 
   onNoteUpdate(({ noteId, title, content }) => {
     notes.value = notes.value.map((note) =>
@@ -99,11 +108,17 @@ const addNote = async () => {
     show('Title and content required', 'error');
     return;
   }
-  await createNote({
+  const newNote = await createNote({
     title: newTitle.value,
     content: newContent.value,
     isFavorite: false,
   });
+
+  emitNoteCreated(newNote);
+
+  notes.value.push(newNote);
+  joinNote(newNote._id);
+
   await fetchNotes();
   show('Note added!');
   newTitle.value = '';

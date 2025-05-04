@@ -29,6 +29,20 @@ function joinNote(noteId) {
   }
 }
 
+function emitNoteCreated(note) {
+  socket.emit('note-created', note);
+}
+
+function onNoteCreated(callback) {
+  if (!listeners.has('note-created')) {
+    socket.on('note-created', (note) => {
+      console.log('Real-time note created:', note);
+      callback(note);
+    });
+    listeners.set('note-created', callback);
+  }
+}
+
 function emitNoteUpdate(noteId, title, content) {
   socket.emit('note-updated', { noteId, title, content });
 }
@@ -88,6 +102,8 @@ export function useSocket() {
     socket,
     isConnected,
     joinNote,
+    onNoteCreated,
+    emitNoteCreated,
     emitNoteUpdate,
     onNoteUpdate,
     emitNoteDeleted,
