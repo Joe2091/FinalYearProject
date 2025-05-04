@@ -35,9 +35,9 @@ onMounted(() => {
     now.value = dayjs();
   }, 1000);
 
-  onNoteUpdate(({ noteId, content }) => {
+  onNoteUpdate(({ noteId, title, content }) => {
     notes.value = notes.value.map((note) =>
-      note._id === noteId ? { ...note, content, updatedAt: dayjs().toISOString() } : note
+      note._id === noteId ? { ...note, title, content, updatedAt: dayjs().toISOString() } : note
     );
   });
   onNoteDeleted(({ noteId }) => {
@@ -77,7 +77,7 @@ const summarizeNote = async (note) => {
 
     note.updatedAt = dayjs().toISOString();
 
-    emitNoteUpdate(note._id, note.content);
+    emitNoteUpdate(note._id, note.title, note.content);
 
     show(`Note "${note.title}" summarized and updated!`, 'success');
   } catch (error) {
@@ -126,7 +126,7 @@ const autoSave = async (note) => {
 
   note.updatedAt = dayjs().toISOString();
 
-  emitNoteUpdate(note._id, note.content);
+  emitNoteUpdate(note._id, note.title, note.content);
 
   show('Note saved');
 };

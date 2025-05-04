@@ -7,8 +7,8 @@ module.exports = function setupNoteSockets(io) {
       console.log(`User ${socket.id} joined note ${noteId}`);
     });
 
-    socket.on('note-updated', ({ noteId, content }) => {
-      socket.to(noteId).emit('note-updated', { noteId, content });
+    socket.on('note-updated', ({ noteId, title, content }) => {
+      socket.to(noteId).emit('note-updated', { noteId, title, content });
     });
 
     socket.on('note-deleted', ({ noteId }) => {

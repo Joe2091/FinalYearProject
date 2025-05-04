@@ -29,8 +29,8 @@ function joinNote(noteId) {
   }
 }
 
-function emitNoteUpdate(noteId, content) {
-  socket.emit('note-updated', { noteId, content });
+function emitNoteUpdate(noteId, title, content) {
+  socket.emit('note-updated', { noteId, title, content });
 }
 
 function onNoteUpdate(callback) {
