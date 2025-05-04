@@ -71,8 +71,8 @@ function onNoteDeleted(callback) {
   }
 }
 
-function emitNoteFavorited(noteId, isFavorite) {
-  socket.emit('note-favorited', { noteId, isFavorite });
+function emitNoteFavorited(noteId, isFavorite, updatedAt) {
+  socket.emit('note-favorited', { noteId, isFavorite, updatedAt });
 }
 
 function onNoteFavorited(callback) {

@@ -53,8 +53,8 @@ onMounted(() => {
     notes.value = notes.value.filter((n) => n._id !== noteId);
   });
 
-  onNoteFavorited(({ noteId, isFavorite }) => {
-    notes.value = notes.value.map((note) => (note._id === noteId ? { ...note, isFavorite } : note));
+  onNoteFavorited(({ noteId, isFavorite, updatedAt }) => {
+    notes.value = notes.value.map((note) => (note._id === noteId ? { ...note, isFavorite, updatedAt } : note));
   });
 });
 
@@ -148,7 +148,6 @@ const autoSave = async (note) => {
 
 const toggleFavorite = async (note) => {
   note.isFavorite = !note.isFavorite;
-  emitNoteFavorited(note._id, note.isFavorite);
   note.updatedAt = dayjs().toISOString();
 
   await updateNote(note._id, {
@@ -156,6 +155,8 @@ const toggleFavorite = async (note) => {
     content: note.content,
     isFavorite: note.isFavorite,
   });
+
+  emitNoteFavorited(note._id, note.isFavorite, note.updatedAt);
 
   show(note.isFavorite ? 'Favorited Note' : 'Unfavorited Note');
 };

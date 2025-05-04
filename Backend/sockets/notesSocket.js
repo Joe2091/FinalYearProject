@@ -19,8 +19,10 @@ module.exports = function setupNoteSockets(io) {
       socket.to(noteId).emit('note-deleted', { noteId });
     });
 
-    socket.on('note-favorited', ({ noteId, isFavorite }) => {
-      socket.to(noteId).emit('note-favorited', { noteId, isFavorite });
+    socket.on('note-favorited', ({ noteId, isFavorite, updatedAt }) => {
+      socket
+        .to(noteId)
+        .emit('note-favorited', { noteId, isFavorite, updatedAt });
     });
 
     socket.on('disconnect', () => {
