@@ -77,6 +77,8 @@ const summarizeNote = async (note) => {
 
     note.updatedAt = dayjs().toISOString();
 
+    emitNoteUpdate(note._id, note.content);
+
     show(`Note "${note.title}" summarized and updated!`, 'success');
   } catch (error) {
     console.error('Error summarizing note:', error);
