@@ -8,7 +8,16 @@ import { getAuth } from 'firebase/auth';
 import { useTheme } from 'vuetify';
 import { useSocket } from '../composables/useSocket';
 
-const { socket, joinNote, emitNoteUpdate, onNoteUpdate, emitNoteDeleted, onNoteDeleted } = useSocket();
+const {
+  socket,
+  joinNote,
+  emitNoteUpdate,
+  onNoteUpdate,
+  emitNoteDeleted,
+  onNoteDeleted,
+  emitNoteFavorited,
+  onNoteFavorited,
+} = useSocket();
 const auth = getAuth();
 const toast = useToastStore();
 const notes = ref([]);
@@ -33,6 +42,10 @@ onMounted(() => {
   });
   onNoteDeleted(({ noteId }) => {
     notes.value = notes.value.filter((n) => n._id !== noteId);
+  });
+
+  onNoteFavorited(({ noteId, isFavorite }) => {
+    notes.value = notes.value.map((note) => (note._id === noteId ? { ...note, isFavorite } : note));
   });
 });
 
@@ -118,7 +131,7 @@ const autoSave = async (note) => {
 
 const toggleFavorite = async (note) => {
   note.isFavorite = !note.isFavorite;
-
+  emitNoteFavorited(note._id, note.isFavorite);
   note.updatedAt = dayjs().toISOString();
 
   await updateNote(note._id, {

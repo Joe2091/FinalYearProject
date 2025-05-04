@@ -57,6 +57,20 @@ function onNoteDeleted(callback) {
   }
 }
 
+function emitNoteFavorited(noteId, isFavorite) {
+  socket.emit('note-favorited', { noteId, isFavorite });
+}
+
+function onNoteFavorited(callback) {
+  if (!listeners.has('note-favorited')) {
+    socket.on('note-favorited', (payload) => {
+      console.log('Favorite status changed:', payload);
+      callback(payload);
+    });
+    listeners.set('note-favorited', callback);
+  }
+}
+
 function cleanupListeners() {
   for (const [event, handler] of listeners.entries()) {
     socket.off(event, handler);
@@ -78,5 +92,7 @@ export function useSocket() {
     onNoteUpdate,
     emitNoteDeleted,
     onNoteDeleted,
+    emitNoteFavorited,
+    onNoteFavorited,
   };
 }
