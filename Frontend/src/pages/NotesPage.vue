@@ -6,7 +6,9 @@ import { useToastStore } from '../stores/toastStore';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import { useTheme } from 'vuetify';
+import { useSocket } from '../composables/useSocket';
 
+const { socket, joinNote, emitNoteUpdate, onNoteUpdate, emitNoteDeleted, onNoteDeleted } = useSocket();
 const auth = getAuth();
 const toast = useToastStore();
 const notes = ref([]);
@@ -23,10 +25,20 @@ onMounted(() => {
   timer = setInterval(() => {
     now.value = dayjs();
   }, 1000);
+
+  onNoteUpdate(({ noteId, content }) => {
+    notes.value = notes.value.map((note) =>
+      note._id === noteId ? { ...note, content, updatedAt: dayjs().toISOString() } : note
+    );
+  });
+  onNoteDeleted(({ noteId }) => {
+    notes.value = notes.value.filter((n) => n._id !== noteId);
+  });
 });
 
 onBeforeUnmount(() => {
   clearInterval(timer);
+  socket.off('note-updated');
 });
 
 const summarizeNote = async (note) => {
@@ -63,6 +75,8 @@ const show = (msg, color = 'success') => toast.show(msg, color);
 
 const fetchNotes = async () => {
   notes.value = await getNotes();
+
+  notes.value.forEach((note) => joinNote(note._id));
 };
 
 const addNote = async () => {
@@ -83,6 +97,7 @@ const addNote = async () => {
 
 const deleteNoteById = async (id) => {
   await deleteNote(id);
+  emitNoteDeleted(id);
   await fetchNotes();
   show('Note deleted', 'error');
 };
@@ -95,6 +110,8 @@ const autoSave = async (note) => {
   });
 
   note.updatedAt = dayjs().toISOString();
+
+  emitNoteUpdate(note._id, note.content);
 
   show('Note saved');
 };
@@ -178,7 +195,9 @@ const formatDate = (date) => {
 
           <!-- Content -->
           <v-textarea
-            v-model="note.content"
+            :model-value="note.content"
+            @update:model-value="(val) => (note.content = val)"
+            :key="note.updatedAt"
             placeholder="Start typing..."
             variant="plain"
             rows="3"

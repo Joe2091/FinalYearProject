@@ -150,9 +150,19 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST'],
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        origin === 'http://localhost:5173' ||
+        origin.startsWith('chrome-extension://')
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Blocked by CORS'));
+      }
+    },
     credentials: true,
+    methods: ['GET', 'POST'],
   },
 });
 

@@ -8,7 +8,11 @@ module.exports = function setupNoteSockets(io) {
     });
 
     socket.on('note-updated', ({ noteId, content }) => {
-      socket.to(noteId).emit('note-updated', content);
+      socket.to(noteId).emit('note-updated', { noteId, content });
+    });
+
+    socket.on('note-deleted', ({ noteId }) => {
+      socket.to(noteId).emit('note-deleted', { noteId });
     });
 
     socket.on('disconnect', () => {
