@@ -140,6 +140,35 @@ app.delete('/api/notes/:id', verifyToken, async (req, res) => {
   }
 });
 
+app.post('/api/notes/:id/favorite', verifyToken, async (req, res) => {
+  const userId = req.user.uid;
+  const noteId = req.params.id;
+
+  try {
+    const note = await Note.findById(noteId);
+    if (!note) return res.status(404).json({ message: 'Note not found' });
+
+    const index = note.favorites.indexOf(userId);
+    let isFavorite;
+
+    if (index > -1) {
+      note.favorites.splice(index, 1);
+      isFavorite = false;
+    } else {
+      note.favorites.push(userId);
+      isFavorite = true;
+    }
+
+    note.updatedAt = new Date();
+    await note.save();
+
+    res.json({ isFavorite, updatedAt: note.updatedAt });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 app.use('/api/summarize', verifyToken, summarizeRoute);
 app.use('/api/chat', verifyToken, chatRoute);
 app.use('/api/reminders', remindersRoute);

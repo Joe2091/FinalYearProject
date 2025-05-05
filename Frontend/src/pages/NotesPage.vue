@@ -117,11 +117,13 @@ const summarizeNote = async (note) => {
 const show = (msg, color = 'success') => toast.show(msg, color);
 
 const fetchNotes = async () => {
+  const currentUid = auth.currentUser?.uid;
   notes.value = await getNotes();
 
   notes.value.forEach((note) => {
     joinNote(note._id);
     shareMenus[note._id] = false;
+    note.isFavorite = note.favorites?.includes(currentUid);
   });
 };
 const addNote = async () => {
@@ -168,18 +170,28 @@ const autoSave = async (note) => {
 };
 
 const toggleFavorite = async (note) => {
-  note.isFavorite = !note.isFavorite;
-  note.updatedAt = dayjs().toISOString();
+  try {
+    const token = await auth.currentUser.getIdToken();
 
-  await updateNote(note._id, {
-    title: note.title,
-    content: note.content,
-    isFavorite: note.isFavorite,
-  });
+    const res = await axios.post(
+      `http://localhost:5000/api/notes/${note._id}/favorite`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  emitNoteFavorited(note._id, note.isFavorite, note.updatedAt);
+    const { isFavorite, updatedAt } = res.data;
+    note.isFavorite = isFavorite;
+    note.updatedAt = updatedAt;
 
-  show(note.isFavorite ? 'Favorited Note' : 'Unfavorited Note');
+    show(isFavorite ? 'Favorited Note' : 'Unfavorited Note');
+  } catch (error) {
+    console.error('Error toggling favorite:', error);
+    show('Failed to update favorite status', 'error');
+  }
 };
 
 onMounted(fetchNotes);
