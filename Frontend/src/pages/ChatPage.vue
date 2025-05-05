@@ -14,17 +14,14 @@ const {
   userInput,
   loading,
   chatContainer,
-  showScrollToBottom,
   md,
   sidebarCollapsed,
   messages,
   toggleSidebar,
   createNewChat,
   selectChat,
-  openRenameDialog,
   confirmRename,
   deleteChat,
-  scrollToBottom,
   sendMessage,
 } = useChatbot();
 </script>
@@ -62,62 +59,65 @@ const {
             v-for="chat in chats"
             :key="chat.id"
             :class="{ 'selected-chat': chat.id === currentChatId }"
-            @click="selectChat(chat.id)"
             class="rounded-lg pa-2 mb-2"
             style="background-color: transparent; box-shadow: none"
+            @click="selectChat(chat.id)"
           >
-            <v-list-item-title style="display: flex; align-items: center; justify-content: space-between; width: 100%">
-              <v-tooltip location="top">
-                <template #activator="{ props }">
-                  <span
-                    v-bind="props"
-                    style="
-                      overflow: hidden;
-                      white-space: nowrap;
-                      text-overflow: ellipsis;
-                      max-width: 160px;
-                      display: inline-block;
-                    "
-                  >
-                    {{ chat.name }}
-                  </span>
-                </template>
-                <span>{{ chat.name }}</span>
-              </v-tooltip>
+            <template v-if="renameDialog === chat.id">
+              <v-text-field
+                v-model="chatNameInput"
+                dense
+                placeholder="Rename chat"
+                @keyup.enter="confirmRename(chat.id)"
+                @blur="confirmRename(chat.id)"
+                hide-details
+                autofocus
+              />
+            </template>
 
-              <v-menu :close-on-content-click="false" offset-y>
-                <template #activator="{ props }">
-                  <v-btn icon size="x-small" v-bind="props" :id="`menu-activator-${chat.id}`" class="no-outline">
-                    <v-icon size="18">mdi-dots-vertical</v-icon>
-                  </v-btn>
-                </template>
+            <template v-else>
+              <v-list-item-title
+                style="display: flex; align-items: center; justify-content: space-between; width: 100%"
+              >
+                <v-tooltip location="top">
+                  <template #activator="{ props }">
+                    <span
+                      v-bind="props"
+                      style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 160px"
+                    >
+                      {{ chat.name }}
+                    </span>
+                  </template>
+                  <span>{{ chat.name }}</span>
+                </v-tooltip>
 
-                <v-list>
-                  <v-list-item @click="openRenameDialog(chat.id)">
-                    <v-list-item-title>Edit Name</v-list-item-title>
-                  </v-list-item>
-                  <v-list-item @click="deleteChat(chat.id)">
-                    <v-list-item-title>Delete Chat</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </v-list-item-title>
+                <v-menu :close-on-content-click="false" offset-y>
+                  <template #activator="{ props }">
+                    <v-btn icon size="x-small" v-bind="props" class="no-outline">
+                      <v-icon size="18">mdi-dots-vertical</v-icon>
+                    </v-btn>
+                  </template>
+
+                  <v-list>
+                    <v-list-item
+                      @click.stop="
+                        () => {
+                          renameDialog = chat.id;
+                          chatNameInput = chat.name;
+                        }
+                      "
+                    >
+                      <v-list-item-title>Edit Name</v-list-item-title>
+                    </v-list-item>
+                    <v-list-item @click.stop="deleteChat(chat.id)">
+                      <v-list-item-title>Delete Chat</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </v-list-item-title>
+            </template>
           </v-list-item>
         </v-list>
-        <!-- Rename Chat Dialog -->
-        <v-dialog v-model="renameDialog" max-width="400px">
-          <v-card>
-            <v-card-title>Edit Chat Name</v-card-title>
-            <v-card-text>
-              <v-text-field v-model="chatNameInput" label="New chat name" outlined dense />
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn text @click="renameDialog = false">Cancel</v-btn>
-              <v-btn text @click="confirmRename">Save</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
       </div>
     </v-sheet>
 
@@ -148,9 +148,6 @@ const {
             <div class="markdown" v-html="md.render(message.content)"></div>
           </div>
         </div>
-        <v-btn v-if="showScrollToBottom" @click="scrollToBottom" icon color="primary" class="scroll-to-bottom">
-          <v-icon>mdi-arrow-down</v-icon>
-        </v-btn>
       </div>
 
       <!-- Chat Input -->

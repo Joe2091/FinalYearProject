@@ -14,7 +14,6 @@ export function useChatbot() {
   const userInput = ref('');
   const loading = ref(false);
   const chatContainer = ref(null);
-  const showScrollToBottom = ref(false);
   const md = new MarkdownIt();
   const sidebarCollapsed = ref(false);
 
@@ -68,7 +67,10 @@ export function useChatbot() {
     loading.value = true;
     await fetchChats();
     loading.value = false;
-    scrollToBottom();
+
+    nextTick(() => {
+      scrollToBottom();
+    });
   });
 
   watch(
@@ -96,25 +98,17 @@ export function useChatbot() {
 
   function selectChat(id) {
     currentChatId.value = id;
+    nextTick(() => {
+      scrollToBottom();
+    });
   }
 
-  function openRenameDialog(id) {
+  const confirmRename = (id) => {
+    if (!chatNameInput.value.trim()) return;
     const chat = chats.value.find((c) => c.id === id);
-    if (!chat) return;
-    chatNameInput.value = chat.name;
-    renameChatId.value = id;
-    renameDialog.value = true;
-    menuChatId.value = null;
-  }
-
-  function confirmRename() {
-    const chat = chats.value.find((c) => c.id === renameChatId.value);
-    if (chat && chatNameInput.value.trim() !== '') {
-      chat.name = chatNameInput.value.trim();
-    }
-    renameDialog.value = false;
-    renameChatId.value = null;
-  }
+    if (chat) chat.name = chatNameInput.value.trim();
+    renameDialog.value = null;
+  };
 
   function deleteChat(id) {
     chats.value = chats.value.filter((chat) => chat.id !== id);
@@ -182,14 +176,12 @@ export function useChatbot() {
     userInput,
     loading,
     chatContainer,
-    showScrollToBottom,
     md,
     sidebarCollapsed,
     messages,
     toggleSidebar,
     createNewChat,
     selectChat,
-    openRenameDialog,
     confirmRename,
     deleteChat,
     scrollToBottom,
