@@ -2,10 +2,13 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const Note = require('./models/Note');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const verifyToken = require('./middleware/verifyToken');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const allowedOrigins = [
   'chrome-extension://*', // Allows Chrome Extensions
@@ -44,20 +47,6 @@ mongoose
   .then(() => console.log('MongoDB Connected'))
   .catch((err) => console.error('MongoDB Connection Error:', err));
 
-// Note Schema
-const noteSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true },
-    content: { type: String, required: true },
-    createdBy: { type: String, required: true },
-    isFavorite: { type: Boolean, default: false },
-  },
-  { timestamps: true },
-);
-
-// Create Note Model
-const Note = mongoose.model('Note', noteSchema);
-
 // Test Route
 app.get('/', (req, res) => {
   res.send('Notes API is running...');
@@ -85,7 +74,9 @@ app.post('/api/notes', verifyToken, async (req, res) => {
 // Get All Notes
 app.get('/api/notes', verifyToken, async (req, res) => {
   try {
-    const notes = await Note.find({ createdBy: req.user.uid });
+    const notes = await Note.find({
+      $or: [{ createdBy: req.user.uid }, { sharedWith: req.user.uid }],
+    });
     res.json(notes);
   } catch (error) {
     console.error('Error fetching notes', error);
@@ -119,22 +110,62 @@ app.put('/api/notes/:id', verifyToken, async (req, res) => {
 
 // Delete a Note
 app.delete('/api/notes/:id', verifyToken, async (req, res) => {
-  try {
-    await Note.findByIdAndDelete({
-      _id: req.params.id,
-      createdBy: req.user.uid,
-    });
+  const userId = req.user.uid;
+  const noteId = req.params.id;
 
-    if (!Note) {
-      return res
-        .status(404)
-        .json({ message: 'Note not found or unauthorized' });
+  try {
+    const note = await Note.findById(noteId);
+
+    if (!note) {
+      return res.status(404).json({ message: 'Note not found' });
     }
 
-    res.json({ message: 'Note deleted' });
+    // Owner of the Note can delete it
+    if (note.createdBy === userId) {
+      await Note.findByIdAndDelete(noteId);
+      return res.json({ message: 'Note deleted (owner)' });
+    }
+
+    // sharedWith user can remove themself from the share
+    if (note.sharedWith.includes(userId)) {
+      note.sharedWith = note.sharedWith.filter((uid) => uid !== userId);
+      await note.save();
+      return res.json({ message: 'Removed shared note for user' });
+    }
+
+    res.status(403).json({ message: 'Not authorized to delete this note' });
   } catch (error) {
     console.error('Error deleting note', error);
     res.status(500).json({ error: 'Error deleting note' });
+  }
+});
+
+app.post('/api/notes/:id/favorite', verifyToken, async (req, res) => {
+  const userId = req.user.uid;
+  const noteId = req.params.id;
+
+  try {
+    const note = await Note.findById(noteId);
+    if (!note) return res.status(404).json({ message: 'Note not found' });
+
+    const index = note.favorites.indexOf(userId);
+    let isFavorite;
+
+    if (index > -1) {
+      note.favorites.splice(index, 1);
+      isFavorite = false;
+    } else {
+      note.favorites.push(userId);
+      isFavorite = true;
+    }
+
+    note.updatedAt = new Date();
+    await note.save();
+
+    res.json({ isFavorite, updatedAt: note.updatedAt });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -143,7 +174,33 @@ app.use('/api/chat', verifyToken, chatRoute);
 app.use('/api/reminders', remindersRoute);
 app.use('/api', userChatsRoutes);
 
-// Start Server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
+// Server created with Socket.io Attached
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        origin === 'http://localhost:5173' ||
+        origin.startsWith('chrome-extension://')
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Blocked by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST'],
+  },
+});
+
+require('./sockets/notesSocket')(io);
+
+const shareNotesRoute = require('./routes/shareNotes')(io);
+app.use('/api', shareNotesRoute);
+
+// Server Start
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server with WebSocket running on http://0.0.0.0:${PORT}`);
 });
