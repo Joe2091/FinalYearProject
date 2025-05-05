@@ -9,7 +9,6 @@ const routes = [
   { path: '/chat', component: () => import('@/pages/ChatPage.vue'), meta: { requiresAuth: true } },
   { path: '/', component: () => import('@/pages/NotesPage.vue'), meta: { requiresAuth: true } },
   { path: '/reminder', component: () => import('@/pages/RemindersPage.vue'), meta: { requiresAuth: true } },
-  { path: '/settings', component: () => import('@/pages/SettingsPage.vue'), meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({
