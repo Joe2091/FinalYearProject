@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const Note = require('./models/Note');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,6 +39,7 @@ const summarizeRoute = require('./routes/summarize');
 const chatRoute = require('./routes/chat');
 const userChatsRoutes = require('./routes/userChats');
 const remindersRoute = require('./routes/reminders');
+const shareNotesRoute = require('./routes/shareNotes');
 require('./services/reminderScheduler');
 
 // Connection to MongoDB
@@ -45,20 +47,6 @@ mongoose
   .connect(process.env.MONGO_URI, {})
   .then(() => console.log('MongoDB Connected'))
   .catch((err) => console.error('MongoDB Connection Error:', err));
-
-// Note Schema
-const noteSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true },
-    content: { type: String, required: true },
-    createdBy: { type: String, required: true },
-    isFavorite: { type: Boolean, default: false },
-  },
-  { timestamps: true },
-);
-
-// Create Note Model
-const Note = mongoose.model('Note', noteSchema);
 
 // Test Route
 app.get('/', (req, res) => {
@@ -144,6 +132,7 @@ app.use('/api/summarize', verifyToken, summarizeRoute);
 app.use('/api/chat', verifyToken, chatRoute);
 app.use('/api/reminders', remindersRoute);
 app.use('/api', userChatsRoutes);
+app.use('/api', shareNotesRoute);
 
 // Server created with Socket.io Attached
 const server = http.createServer(app);

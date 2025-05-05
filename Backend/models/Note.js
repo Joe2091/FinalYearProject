@@ -6,6 +6,7 @@ const NoteSchema = new mongoose.Schema(
     content: { type: String, required: true },
     createdBy: { type: String, required: true },
     isFavorite: { type: Boolean, default: false },
+    sharedWith: { type: [String], default: [] },
   },
   { timestamps: true },
 );

@@ -265,7 +265,9 @@ const formatDate = (date) => {
             <v-btn icon size="small" color="info" @click="summarizeNote(note)">
               <v-icon>mdi-lightbulb-outline</v-icon>
             </v-btn>
-
+            <v-btn icon size="small" color="primary" @click="openShareDialog(note)">
+              <v-icon>mdi-share-variant</v-icon>
+            </v-btn>
             <v-btn icon size="small" class="delete-btn" @click="deleteNoteById(note._id)">
               <v-icon>mdi-delete</v-icon>
             </v-btn>
