@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, reactive } from 'vue';
 import { getNotes, createNote, deleteNote, updateNote } from '@/api/noteService';
 import dayjs from 'dayjs';
 import { useToastStore } from '../stores/toastStore';
@@ -19,6 +19,7 @@ const {
   onNoteDeleted,
   emitNoteFavorited,
   onNoteFavorited,
+  onNoteShared,
 } = useSocket();
 const auth = getAuth();
 const toast = useToastStore();
@@ -27,18 +28,25 @@ const newTitle = ref('');
 const newContent = ref('');
 const editingTitleId = ref(null);
 const now = ref(dayjs());
+const selectedNote = ref(null);
+const shareEmail = ref('');
 const theme = useTheme();
 const isDark = computed(() => theme.global.name.value === 'dark');
 
 let timer = null;
 onMounted(() => {
+  const uid = auth.currentUser?.uid;
+  if (uid) {
+    socket.emit('register-user', uid);
+  }
   fetchNotes();
   timer = setInterval(() => {
     now.value = dayjs();
   }, 1000);
 
   onNoteCreated((note) => {
-    if (!notes.value.some((n) => n._id === note._id)) {
+    const currentUid = auth.currentUser?.uid;
+    if (note.createdBy === currentUid && !notes.value.some((n) => n._id === note._id)) {
       notes.value.push(note);
       joinNote(note._id);
     }
@@ -56,6 +64,17 @@ onMounted(() => {
   onNoteFavorited(({ noteId, isFavorite, updatedAt }) => {
     notes.value = notes.value.map((note) => (note._id === noteId ? { ...note, isFavorite, updatedAt } : note));
   });
+});
+
+onNoteShared((note) => {
+  const existing = notes.value.find((n) => n._id === note._id);
+  if (existing) {
+    Object.assign(existing, note);
+  } else {
+    notes.value.push(note);
+    joinNote(note._id);
+    show(`Shared Note: "${note.title}"`, 'info');
+  }
 });
 
 onBeforeUnmount(() => {
@@ -100,9 +119,11 @@ const show = (msg, color = 'success') => toast.show(msg, color);
 const fetchNotes = async () => {
   notes.value = await getNotes();
 
-  notes.value.forEach((note) => joinNote(note._id));
+  notes.value.forEach((note) => {
+    joinNote(note._id);
+    shareMenus[note._id] = false;
+  });
 };
-
 const addNote = async () => {
   if (!newTitle.value.trim() || !newContent.value.trim()) {
     show('Title and content required', 'error');
@@ -168,6 +189,39 @@ const formatDate = (date) => {
   if (diff < 60) return `${diff} minutes ago`;
   return dayjs(date).format('MMM D, YYYY h:mm A');
 };
+
+const shareMenus = reactive({});
+
+const handleShare = async (note) => {
+  selectedNote.value = note;
+  await shareNote();
+  shareMenus[note._id] = false;
+};
+
+const shareNote = async () => {
+  try {
+    const token = await auth.currentUser.getIdToken();
+    await axios.post(
+      `http://localhost:5000/api/share/${selectedNote.value._id}`,
+      { email: shareEmail.value },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    show('Note shared successfully!', 'success');
+    closeShareDialog();
+  } catch (error) {
+    console.error('Error sharing note:', error);
+    show(error.response?.data?.message || 'Error sharing note', 'error');
+  }
+};
+
+const isSharedNote = (note) => {
+  const currentUid = auth.currentUser?.uid;
+  return note.createdBy !== currentUid;
+};
+
+const truncateTitle = (title, maxLength = 18) => {
+  return title.length > maxLength ? title.slice(0, maxLength) + '…' : title;
+};
 </script>
 
 <template>
@@ -213,14 +267,29 @@ const formatDate = (date) => {
               />
             </template>
             <template v-else>
-              <v-tooltip location="top">
-                <template #activator="{ props }">
-                  <div class="truncated-title" v-bind="props">
-                    {{ note.title }}
-                  </div>
-                </template>
-                <span>{{ note.title }}</span>
-              </v-tooltip>
+              <div class="truncated-title d-flex align-center">
+                <!-- Title tooltip -->
+                <v-tooltip location="top">
+                  <template #activator="{ props }">
+                    <div v-bind="props">
+                      {{ truncateTitle(note.title) }}
+                    </div>
+                  </template>
+                  <span>{{ note.title }}</span>
+                </v-tooltip>
+
+                <!-- Shared users tooltip -->
+                <v-tooltip location="top" v-if="isSharedNote(note) || note.sharedWith?.length">
+                  <template #activator="{ props }">
+                    <v-icon v-bind="props" color="primary" size="small" class="ml-1" style="cursor: default">
+                      mdi-account-multiple
+                    </v-icon>
+                  </template>
+                  <span>
+                    {{ isSharedNote(note) ? 'Shared with you' : `Shared with ${note.sharedWith?.length || 0} user(s)` }}
+                  </span>
+                </v-tooltip>
+              </div>
             </template>
           </div>
 
@@ -265,9 +334,32 @@ const formatDate = (date) => {
             <v-btn icon size="small" color="info" @click="summarizeNote(note)">
               <v-icon>mdi-lightbulb-outline</v-icon>
             </v-btn>
-            <v-btn icon size="small" color="primary" @click="openShareDialog(note)">
-              <v-icon>mdi-share-variant</v-icon>
-            </v-btn>
+            <v-menu v-model="shareMenus[note._id]" :close-on-content-click="false">
+              <template #activator="{ props }">
+                <v-btn
+                  icon
+                  size="small"
+                  color="primary"
+                  v-bind="props"
+                  :id="`share-btn-${note._id}`"
+                  @click.stop="shareMenus[note._id] = true"
+                >
+                  <v-icon>mdi-share-variant</v-icon>
+                </v-btn>
+              </template>
+
+              <v-card style="width: 300px">
+                <v-card-title>Share Note</v-card-title>
+                <v-card-text>
+                  <v-text-field v-model="shareEmail" label="Recipient's Email" dense />
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn text @click="shareMenus[note._id] = false">Cancel</v-btn>
+                  <v-btn color="primary" @click="() => handleShare(note)"> Share </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-menu>
+
             <v-btn icon size="small" class="delete-btn" @click="deleteNoteById(note._id)">
               <v-icon>mdi-delete</v-icon>
             </v-btn>

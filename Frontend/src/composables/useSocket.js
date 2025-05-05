@@ -1,5 +1,6 @@
 import { io } from 'socket.io-client';
 import { ref, onBeforeUnmount } from 'vue';
+import { getAuth } from 'firebase/auth';
 
 const socket = io('http://localhost:5000', {
   withCredentials: true,
@@ -57,8 +58,19 @@ function onNoteUpdate(callback) {
   }
 }
 
+function onNoteShared(callback) {
+  if (!listeners.has('note-shared')) {
+    socket.on('note-shared', (note) => {
+      console.log('Note shared:', note);
+      callback(note);
+    });
+    listeners.set('note-shared', callback);
+  }
+}
+
 function emitNoteDeleted(noteId) {
-  socket.emit('note-deleted', { noteId });
+  const userId = getAuth().currentUser?.uid;
+  socket.emit('note-deleted', { noteId, userId });
 }
 
 function onNoteDeleted(callback) {
@@ -110,5 +122,6 @@ export function useSocket() {
     onNoteDeleted,
     emitNoteFavorited,
     onNoteFavorited,
+    onNoteShared,
   };
 }

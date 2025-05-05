@@ -39,7 +39,6 @@ const summarizeRoute = require('./routes/summarize');
 const chatRoute = require('./routes/chat');
 const userChatsRoutes = require('./routes/userChats');
 const remindersRoute = require('./routes/reminders');
-const shareNotesRoute = require('./routes/shareNotes');
 require('./services/reminderScheduler');
 
 // Connection to MongoDB
@@ -75,7 +74,9 @@ app.post('/api/notes', verifyToken, async (req, res) => {
 // Get All Notes
 app.get('/api/notes', verifyToken, async (req, res) => {
   try {
-    const notes = await Note.find({ createdBy: req.user.uid });
+    const notes = await Note.find({
+      $or: [{ createdBy: req.user.uid }, { sharedWith: req.user.uid }],
+    });
     res.json(notes);
   } catch (error) {
     console.error('Error fetching notes', error);
@@ -109,19 +110,30 @@ app.put('/api/notes/:id', verifyToken, async (req, res) => {
 
 // Delete a Note
 app.delete('/api/notes/:id', verifyToken, async (req, res) => {
-  try {
-    await Note.findByIdAndDelete({
-      _id: req.params.id,
-      createdBy: req.user.uid,
-    });
+  const userId = req.user.uid;
+  const noteId = req.params.id;
 
-    if (!Note) {
-      return res
-        .status(404)
-        .json({ message: 'Note not found or unauthorized' });
+  try {
+    const note = await Note.findById(noteId);
+
+    if (!note) {
+      return res.status(404).json({ message: 'Note not found' });
     }
 
-    res.json({ message: 'Note deleted' });
+    // Owner of the Note can delete it
+    if (note.createdBy === userId) {
+      await Note.findByIdAndDelete(noteId);
+      return res.json({ message: 'Note deleted (owner)' });
+    }
+
+    // sharedWith user can remove themself from the share
+    if (note.sharedWith.includes(userId)) {
+      note.sharedWith = note.sharedWith.filter((uid) => uid !== userId);
+      await note.save();
+      return res.json({ message: 'Removed shared note for user' });
+    }
+
+    res.status(403).json({ message: 'Not authorized to delete this note' });
   } catch (error) {
     console.error('Error deleting note', error);
     res.status(500).json({ error: 'Error deleting note' });
@@ -132,7 +144,6 @@ app.use('/api/summarize', verifyToken, summarizeRoute);
 app.use('/api/chat', verifyToken, chatRoute);
 app.use('/api/reminders', remindersRoute);
 app.use('/api', userChatsRoutes);
-app.use('/api', shareNotesRoute);
 
 // Server created with Socket.io Attached
 const server = http.createServer(app);
@@ -156,6 +167,9 @@ const io = new Server(server, {
 });
 
 require('./sockets/notesSocket')(io);
+
+const shareNotesRoute = require('./routes/shareNotes')(io);
+app.use('/api', shareNotesRoute);
 
 // Server Start
 server.listen(PORT, '0.0.0.0', () => {
