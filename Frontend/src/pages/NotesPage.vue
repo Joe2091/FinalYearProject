@@ -17,7 +17,6 @@ const {
   onNoteUpdate,
   emitNoteDeleted,
   onNoteDeleted,
-  emitNoteFavorited,
   onNoteFavorited,
   onNoteShared,
 } = useSocket();
@@ -28,7 +27,6 @@ const newTitle = ref('');
 const newContent = ref('');
 const editingTitleId = ref(null);
 const now = ref(dayjs());
-const selectedNote = ref(null);
 const shareEmail = ref('');
 const theme = useTheme();
 const isDark = computed(() => theme.global.name.value === 'dark');
@@ -204,22 +202,17 @@ const formatDate = (date) => {
 
 const shareMenus = reactive({});
 
-const handleShare = async (note) => {
-  selectedNote.value = note;
-  await shareNote();
-  shareMenus[note._id] = false;
-};
-
-const shareNote = async () => {
+const shareNote = async (note) => {
   try {
     const token = await auth.currentUser.getIdToken();
     await axios.post(
-      `http://localhost:5000/api/share/${selectedNote.value._id}`,
+      `http://localhost:5000/api/share/${note._id}`,
       { email: shareEmail.value },
       { headers: { Authorization: `Bearer ${token}` } }
     );
     show('Note shared successfully!', 'success');
-    closeShareDialog();
+    shareMenus[note._id] = false;
+    shareEmail.value = '';
   } catch (error) {
     console.error('Error sharing note:', error);
     show(error.response?.data?.message || 'Error sharing note', 'error');
@@ -367,7 +360,7 @@ const truncateTitle = (title, maxLength = 18) => {
                 </v-card-text>
                 <v-card-actions>
                   <v-btn text @click="shareMenus[note._id] = false">Cancel</v-btn>
-                  <v-btn color="primary" @click="() => handleShare(note)"> Share </v-btn>
+                  <v-btn color="primary" @click="() => shareNote(note)"> Share </v-btn>
                 </v-card-actions>
               </v-card>
             </v-menu>
