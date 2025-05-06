@@ -1,20 +1,20 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
 import { auth } from '../plugins/firebase';
 
-const routes = [
-  { path: '/register', component: () => import('@/pages/auth/Register.vue') },
-  { path: '/login', component: () => import('@/pages/auth/Login.vue') },
-  { path: '/account', component: () => import('@/pages/AccountPage.vue'), meta: { requiresAuth: true } },
-  { path: '/chat', component: () => import('@/pages/ChatPage.vue'), meta: { requiresAuth: true } },
-  { path: '/', component: () => import('@/pages/NotesPage.vue'), meta: { requiresAuth: true } },
-  { path: '/reminder', component: () => import('@/pages/RemindersPage.vue'), meta: { requiresAuth: true } },
-  { path: '/settings', component: () => import('@/pages/SettingsPage.vue'), meta: { requiresAuth: true } },
-];
+const isExtension = typeof chrome !== 'undefined' && chrome.runtime?.id !== undefined;
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes,
+  history: isExtension ? createWebHashHistory() : createWebHistory(),
+  routes: [
+    { path: '/register', component: () => import('@/pages/auth/Register.vue') },
+    { path: '/login', component: () => import('@/pages/auth/Login.vue') },
+    { path: '/account', component: () => import('@/pages/AccountPage.vue'), meta: { requiresAuth: true } },
+    { path: '/chat', component: () => import('@/pages/ChatPage.vue'), meta: { requiresAuth: true } },
+    { path: '/', component: () => import('@/pages/NotesPage.vue'), meta: { requiresAuth: true } },
+    { path: '/reminder', component: () => import('@/pages/RemindersPage.vue'), meta: { requiresAuth: true } },
+    { path: '/:pathMatch(.*)*', redirect: '/' },
+  ],
 });
 
 let isAuthResolved = false;

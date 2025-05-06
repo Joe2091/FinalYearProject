@@ -1,3 +1,16 @@
+<script setup>
+import { useAuthStore } from '@/stores/authStore';
+import { useRouter } from 'vue-router';
+
+const authStore = useAuthStore();
+const router = useRouter();
+const user = authStore.user;
+
+const logout = async () => {
+  await authStore.logout();
+  router.push('/login');
+};
+</script>
 <template>
   <v-container class="d-flex justify-center">
     <v-card width="500" class="pa-6">
@@ -21,17 +34,3 @@
     </v-card>
   </v-container>
 </template>
-
-<script setup>
-import { useAuthStore } from '@/stores/authStore';
-import { useRouter } from 'vue-router';
-
-const authStore = useAuthStore();
-const router = useRouter();
-const user = authStore.user;
-
-const logout = async () => {
-  await authStore.logout();
-  router.push('/login');
-};
-</script>

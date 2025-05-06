@@ -1,21 +1,3 @@
-<template>
-  <v-container class="d-flex justify-center">
-    <v-card width="400" class="pa-4">
-      <v-card-title class="text-h6">Create Account</v-card-title>
-      <v-text-field v-model="email" label="Email" type="email" outlined dense />
-      <v-text-field v-model="password" label="Password" type="password" outlined dense />
-      <div class="d-flex justify-center mt-1">
-        <v-btn color="primary" class="mt-3" @click="registerUser">Register</v-btn>
-      </div>
-      <p class="mt-2 text-caption">
-        Already have an account?
-        <router-link to="/login" aria-label="Go to Register Page">Login here</router-link>
-      </p>
-      <v-alert v-if="error" type="error" dense class="mt-2">{{ error }}</v-alert>
-    </v-card>
-  </v-container>
-</template>
-
 <script setup>
 import { ref } from 'vue';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -40,6 +22,24 @@ const registerUser = async () => {
   }
 };
 </script>
+<template>
+  <v-container class="d-flex justify-center">
+    <v-card width="400" class="pa-4">
+      <v-card-title class="text-h6">Create Account</v-card-title>
+      <v-text-field v-model="email" label="Email" type="email" outlined dense />
+      <v-text-field v-model="password" label="Password" type="password" outlined dense />
+      <div class="d-flex justify-center mt-1">
+        <v-btn color="primary" class="mt-3" @click="registerUser">Register</v-btn>
+      </div>
+      <p class="mt-2 text-caption">
+        Already have an account?
+        <router-link to="/login" aria-label="Go to Register Page">Login here</router-link>
+      </p>
+      <v-alert v-if="error" type="error" dense class="mt-2">{{ error }}</v-alert>
+    </v-card>
+  </v-container>
+</template>
+
 <style scoped>
 .text-caption {
   margin-top: 16px;

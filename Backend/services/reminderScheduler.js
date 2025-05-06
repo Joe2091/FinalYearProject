@@ -34,4 +34,4 @@ async function checkReminders() {
   }
 }
 
-setInterval(checkReminders, 60 * 1000);
+setInterval(checkReminders, 10 * 1000);

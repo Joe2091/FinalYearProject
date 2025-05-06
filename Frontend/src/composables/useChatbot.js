@@ -2,6 +2,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import MarkdownIt from 'markdown-it';
+import { useToastStore } from '../stores/toastStore';
 
 export function useChatbot() {
   const chats = ref([]);
@@ -14,9 +15,9 @@ export function useChatbot() {
   const userInput = ref('');
   const loading = ref(false);
   const chatContainer = ref(null);
-  const showScrollToBottom = ref(false);
   const md = new MarkdownIt();
   const sidebarCollapsed = ref(false);
+  const toast = useToastStore();
 
   const messages = computed(() => {
     return chats.value.find((chat) => chat.id === currentChatId.value)?.messages || [];
@@ -68,7 +69,10 @@ export function useChatbot() {
     loading.value = true;
     await fetchChats();
     loading.value = false;
-    scrollToBottom();
+
+    nextTick(() => {
+      scrollToBottom();
+    });
   });
 
   watch(
@@ -92,36 +96,33 @@ export function useChatbot() {
     };
     chats.value.push(newChat);
     currentChatId.value = newChat.id;
+    toast.show('New chat created', 'success');
   }
 
   function selectChat(id) {
     currentChatId.value = id;
+    nextTick(() => {
+      scrollToBottom();
+    });
   }
 
-  function openRenameDialog(id) {
+  const confirmRename = (id) => {
+    if (!chatNameInput.value.trim()) return;
     const chat = chats.value.find((c) => c.id === id);
-    if (!chat) return;
-    chatNameInput.value = chat.name;
-    renameChatId.value = id;
-    renameDialog.value = true;
-    menuChatId.value = null;
-  }
+    if (chat) chat.name = chatNameInput.value.trim();
+    toast.show('Chat renamed', 'success');
 
-  function confirmRename() {
-    const chat = chats.value.find((c) => c.id === renameChatId.value);
-    if (chat && chatNameInput.value.trim() !== '') {
-      chat.name = chatNameInput.value.trim();
-    }
-    renameDialog.value = false;
-    renameChatId.value = null;
-  }
+    renameDialog.value = null;
+  };
 
   function deleteChat(id) {
+    const deleted = chats.value.find((chat) => chat.id === id);
     chats.value = chats.value.filter((chat) => chat.id !== id);
     if (currentChatId.value === id) {
       currentChatId.value = chats.value[0]?.id || null;
     }
     menuChatId.value = null;
+    toast.show(`Deleted chat "${deleted?.name || 'Chat'}"`, 'error');
   }
 
   function scrollToBottom() {
@@ -182,14 +183,12 @@ export function useChatbot() {
     userInput,
     loading,
     chatContainer,
-    showScrollToBottom,
     md,
     sidebarCollapsed,
     messages,
     toggleSidebar,
     createNewChat,
     selectChat,
-    openRenameDialog,
     confirmRename,
     deleteChat,
     scrollToBottom,

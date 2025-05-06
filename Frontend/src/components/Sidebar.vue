@@ -65,18 +65,6 @@
         <v-list-item-title v-if="!isCollapsed">Chatbot</v-list-item-title>
       </v-list-item>
 
-      <v-list-item
-        link
-        to="/settings"
-        :class="[
-          $route.path === '/settings' ? (isDark ? 'active-item-dark' : 'active-item-light') : '',
-          $route.path === '/settings' ? 'no-hover' : '',
-        ]"
-      >
-        <v-icon start>mdi-cog</v-icon>
-        <v-list-item-title v-if="!isCollapsed">Settings</v-list-item-title>
-      </v-list-item>
-
       <v-divider class="my-2" />
 
       <template v-if="!authStore.user">
