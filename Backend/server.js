@@ -2,6 +2,8 @@ require('dotenv').config();
 const http = require('http');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io');
+const path = require('path');
+const express = require('express');
 
 const app = require('./app');
 
@@ -13,15 +15,20 @@ mongoose
   .then(() => console.log('MongoDB Connected'))
   .catch((err) => console.error('MongoDB Connection Error:', err));
 
+const frontendPath = path.join(__dirname, '../Frontend/dist-web');
+app.use(express.static(frontendPath));
+
 // Create HTTP server and attach Socket.IO
 const server = http.createServer(app);
+
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:5000'];
 
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
       if (
         !origin ||
-        origin === 'http://localhost:5173' ||
+        allowedOrigins.includes(origin) ||
         origin.startsWith('chrome-extension://')
       ) {
         callback(null, true);
@@ -40,6 +47,10 @@ require('./sockets/notesSocket')(io);
 // Setup for ShareNotes
 const shareNotesRoute = require('./routes/shareNotes')(io);
 app.use('/api', shareNotesRoute);
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // Server Start
 server.listen(PORT, '0.0.0.0', () => {

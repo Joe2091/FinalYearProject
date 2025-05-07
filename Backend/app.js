@@ -10,7 +10,11 @@ require('./services/reminderScheduler');
 
 const app = express();
 
-const allowedOrigins = ['chrome-extension://*', 'http://localhost:5173'];
+const allowedOrigins = [
+  'chrome-extension://*',
+  'http://localhost:5173',
+  'http://localhost:5000',
+];
 
 app.use(express.json());
 app.use(
@@ -33,7 +37,7 @@ app.use(
 );
 
 // Note routes
-app.get('/', (req, res) => res.send('Notes API is running...'));
+//app.get('/', (req, res) => res.send('Notes API is running...'));
 
 app.post('/api/notes', verifyToken, async (req, res) => {
   try {

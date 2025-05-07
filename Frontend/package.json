@@ -4,8 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev:web": "vite --config vite.config.web.js",
+    "dev:extension": "vite --config vite.config.extension.js",
     "build": "vite build",
+    "build:web": "vite build --config vite.config.web.js",
+    "build:extension": "vite build --config vite.config.extension.js",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui"
