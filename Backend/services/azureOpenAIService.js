@@ -1,12 +1,11 @@
 const axios = require('axios');
 require('dotenv').config();
 
-const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
-const apiKey = process.env.AZURE_OPENAI_API_KEY;
-const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME;
-const apiVersion = process.env.AZURE_OPENAI_API_VERSION;
-
 async function summarizeNote(noteContent) {
+  const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
+  const apiKey = process.env.AZURE_OPENAI_API_KEY;
+  const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME;
+  const apiVersion = process.env.AZURE_OPENAI_API_VERSION;
   const url = `${endpoint.replace(/\/$/, '')}/openai/deployments/${deployment}/completions?api-version=${apiVersion}`;
 
   const headers = {

@@ -3,8 +3,8 @@ const { summarizeNote } = require('../services/azureOpenAIService');
 
 jest.mock('axios');
 
-process.env.AZURE_OPENAI_ENDPOINT = 'https://your-endpoint.openai.azure.com';
-process.env.AZURE_OPENAI_DEPLOYMENT_NAME = 'your-deployment';
+process.env.AZURE_OPENAI_ENDPOINT = 'https://test-endpoint.openai.azure.com';
+process.env.AZURE_OPENAI_DEPLOYMENT_NAME = 'test-deployment';
 process.env.AZURE_OPENAI_API_VERSION = '2023-05-15';
 
 describe('summarizeNote', () => {
