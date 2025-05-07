@@ -1,5 +1,6 @@
 require('dotenv').config();
 const http = require('http');
+const http = require('http');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io');
 const path = require('path');
@@ -44,6 +45,7 @@ const io = new Server(server, {
 // Setup WebSocket
 require('./sockets/notesSocket')(io);
 
+// Setup for ShareNotes
 // Setup for ShareNotes
 const shareNotesRoute = require('./routes/shareNotes')(io);
 app.use('/api', shareNotesRoute);
