@@ -2,9 +2,9 @@ const { EmailClient } = require('@azure/communication-email');
 require('dotenv').config();
 
 const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING;
-const emailClient = new EmailClient(connectionString);
 
 async function sendReminderEmail(to, subject, body, htmlBody) {
+  const emailClient = new EmailClient(connectionString);
   const message = {
     senderAddress: process.env.AZURE_SENDER_EMAIL,
     content: {
