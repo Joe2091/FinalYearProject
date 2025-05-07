@@ -33,7 +33,7 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
   },
 });
-//test
+
 // Setup WebSocket
 require('./sockets/notesSocket')(io);
 
