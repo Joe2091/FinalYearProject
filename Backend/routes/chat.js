@@ -11,6 +11,10 @@ const apiKey = process.env.AZURE_OPENAI_CHATBOT_API_KEY;
 router.post('/', verifyToken, async (req, res) => {
   const { messages } = req.body;
 
+  if (!Array.isArray(messages)) {
+    return res.status(400).json({ error: 'Missing or invalid messages' });
+  }
+
   const systemPrompt = {
     role: 'system',
     content: `

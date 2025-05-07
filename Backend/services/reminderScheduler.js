@@ -37,3 +37,5 @@ async function checkReminders() {
 if (process.env.NODE_ENV !== 'test') {
   setInterval(checkReminders, 10 * 1000);
 }
+
+module.exports = { checkReminders };
