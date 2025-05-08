@@ -29,10 +29,11 @@ async function checkReminders() {
 
         await sendReminderEmail(
           user.email,
-          `Reminder: ${reminder.title}`,
+          reminder.title,
           body,
           null,
           localTime,
+          reminder,
         );
 
         reminder.notified = true;
