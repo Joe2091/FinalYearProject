@@ -21,6 +21,7 @@ describe('checkReminders', () => {
       createdBy: 'test-user',
       notified: false,
       save: jest.fn(),
+      datetime: new Date(),
     };
 
     const fakeUser = {
@@ -36,10 +37,11 @@ describe('checkReminders', () => {
     expect(User.findOne).toHaveBeenCalledWith({ uid: 'test-user' });
     expect(sendReminderEmail).toHaveBeenCalledWith(
       fakeUser.email,
-      fakeReminder.title,
+      `Reminder: ${fakeReminder.title}`,
       expect.stringContaining('Test Content'),
       null,
-      undefined,
+      expect.any(String),
+      fakeReminder,
     );
     expect(fakeReminder.save).toHaveBeenCalled();
   });

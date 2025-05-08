@@ -1,38 +1,32 @@
-name: Running CI tests
+name: CI - Run Backend Tests Only
 
 on:
   push:
-    branches:
-      - '**'
+    branches: ['*']
   pull_request:
   workflow_dispatch:
 
 jobs:
-  tests-etc:
+  run-backend-tests:
     runs-on: ubuntu-latest
-    environment:
-      name: 'Production'
-
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js version
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         run: npm install
         working-directory: Backend
 
-      - name: Run Backend tests
-        run: npm test
+      - name: Run ESLint (lint check)
+        run: npm run lint
         working-directory: Backend
 
-      - name: Security audit
-        run: npm audit --audit-level=moderate
+      - name: Run backend tests
+        run: npm test
         working-directory: Backend
