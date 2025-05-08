@@ -14,6 +14,7 @@ const allowedOrigins = [
   'chrome-extension://*',
   'http://localhost:5173',
   'http://localhost:5000',
+  'http://178.62.76.180:5000',
 ];
 
 app.use(express.json());
