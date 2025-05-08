@@ -21,7 +21,7 @@ async function sendReminderEmail(
       html:
         htmlBody ||
         `
-         <h2 style="color: #6a1b9a;">${subject}</h2>
+         <h2 style="color: #6a1b9a;">${reminder.title}</h2>
          <p><strong>Due:</strong> ${localizedTime}</p>
          <p>${reminder.content?.replace(/\n/g, '<br>') || ''}</p>
         <hr />
