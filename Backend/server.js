@@ -14,15 +14,12 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5000',
   'http://178.62.76.180:5000',
+  'chrome-extension://',
 ];
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        origin.startsWith('chrome-extension://')
-      ) {
+      if (!origin || allowedOrigins.some((o) => origin.startsWith(o))) {
         callback(null, true);
       } else {
         callback(new Error('Blocked by CORS'));
@@ -47,11 +44,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        origin.startsWith('chrome-extension://')
-      ) {
+      if (!origin || allowedOrigins.some((o) => origin.startsWith(o))) {
         callback(null, true);
       } else {
         callback(new Error('Blocked by CORS'));
