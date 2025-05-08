@@ -39,17 +39,24 @@ async function addReminder() {
     return;
   }
 
+  const utcISO = selectedDate.toISOString();
+
+  const payload = {
+    ...newReminder.value,
+    datetime: utcISO,
+  };
+
   if (editingIndex.value !== null) {
     const id = reminders.value[editingIndex.value]._id;
-    await store.updateReminder(id, newReminder.value);
+    await store.updateReminder(id, payload);
     toast.show('Reminder updated', 'success');
     editingIndex.value = null;
   } else {
-    await store.addReminder(newReminder.value);
+    await store.addReminder(payload);
     toast.show('Reminder added', 'success');
   }
 
-  scheduleNotification(newReminder.value);
+  scheduleNotification(payload);
   newReminder.value = { title: '', datetime: '', content: '' };
 }
 

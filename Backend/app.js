@@ -68,7 +68,10 @@ app.put('/api/notes/:id', verifyToken, async (req, res) => {
   try {
     const { title, content, isFavorite } = req.body;
     const updated = await Note.findOneAndUpdate(
-      { _id: req.params.id, createdBy: req.user.uid },
+      {
+        _id: req.params.id,
+        $or: [{ createdBy: req.user.uid }, { sharedWith: req.user.uid }],
+      },
       { title, content, isFavorite },
       { new: true },
     );
