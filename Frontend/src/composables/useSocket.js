@@ -2,7 +2,7 @@ import { io } from 'socket.io-client';
 import { ref, onBeforeUnmount } from 'vue';
 import { getAuth } from 'firebase/auth';
 
-const socket = io('http://178.62.76.180:5000', {
+const socket = io('https://www.notemax.site', {
   withCredentials: true,
 });
 

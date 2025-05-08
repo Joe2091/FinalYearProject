@@ -89,7 +89,7 @@ export function useNotes() {
     try {
       const token = await auth.currentUser.getIdToken();
       const res = await axios.post(
-        `http://178.62.76.180:5000/api/notes/${note._id}/favorite`,
+        `https://notemax.site/api/notes/${note._id}/favorite`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -108,7 +108,7 @@ export function useNotes() {
       show(`Summarizing "${note.title}"...`, 'info');
       const token = await auth.currentUser.getIdToken();
       const response = await axios.post(
-        'http://178.62.76.180:5000/api/summarize',
+        'https://notemax.site/api/summarize',
         { content: note.content },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -131,7 +131,7 @@ export function useNotes() {
     try {
       const token = await auth.currentUser.getIdToken();
       await axios.post(
-        `http://178.62.76.180:5000/api/share/${note._id}`,
+        `https://notemax.site/api/share/${note._id}`,
         { email: shareEmail.value },
         { headers: { Authorization: `Bearer ${token}` } }
       );
