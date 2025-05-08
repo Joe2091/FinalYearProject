@@ -4,10 +4,33 @@ const mongoose = require('mongoose');
 const { Server } = require('socket.io');
 const path = require('path');
 const express = require('express');
+const cors = require('cors');
 
 const app = require('./app');
 
 const PORT = process.env.PORT || 5000;
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5000',
+  'http://178.62.76.180:5000',
+];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.startsWith('chrome-extension://')
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Blocked by CORS'));
+      }
+    },
+    credentials: true,
+  }),
+);
 
 // Connect to MongoDB
 mongoose
@@ -20,8 +43,6 @@ app.use(express.static(frontendPath));
 
 // Create HTTP server and attach Socket.IO
 const server = http.createServer(app);
-
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5000'];
 
 const io = new Server(server, {
   cors: {
