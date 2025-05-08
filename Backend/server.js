@@ -45,7 +45,6 @@ const io = new Server(server, {
 require('./sockets/notesSocket')(io);
 
 // Setup for ShareNotes
-// Setup for ShareNotes
 const shareNotesRoute = require('./routes/shareNotes')(io);
 app.use('/api', shareNotesRoute);
 
