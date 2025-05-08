@@ -13,6 +13,8 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5000',
   'http://178.62.76.180:5000',
+  'https://notemax.site',
+  'https://www.notemax.site',
 ];
 
 function isAllowedOrigin(origin) {
