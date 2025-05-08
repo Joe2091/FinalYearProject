@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { auth } from '@/plugins/firebase';
 
-const API_URL = 'http://localhost:5000/api/notes'; //Back to Local for Development (will switch from AWS to Azure)
+const API_URL = 'http://178.62.76.180:5000/api/notes'; //Back to Local for Development (will switch from AWS to Azure)
 
 const getAuthHeaders = async () => {
   const user = auth.currentUser;

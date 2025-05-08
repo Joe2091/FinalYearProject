@@ -10,7 +10,7 @@ export const useReminderStore = defineStore('reminder', {
     async fetchReminders() {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
-      const res = await axios.get('http://localhost:5000/api/reminders', {
+      const res = await axios.get('http://178.62.76.180:5000/api/reminders', {
         headers: { Authorization: `Bearer ${token}` },
       });
       this.reminders = res.data;
@@ -18,7 +18,7 @@ export const useReminderStore = defineStore('reminder', {
     async addReminder(data) {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
-      const res = await axios.post('http://localhost:5000/api/reminders', data, {
+      const res = await axios.post('http://178.62.76.180:5000/api/reminders', data, {
         headers: { Authorization: `Bearer ${token}` },
       });
       this.reminders.push(res.data);
@@ -26,7 +26,7 @@ export const useReminderStore = defineStore('reminder', {
     async updateReminder(id, updates) {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
-      const res = await axios.put(`http://localhost:5000/api/reminders/${id}`, updates, {
+      const res = await axios.put(`http://178.62.76.180:5000/api/reminders/${id}`, updates, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const index = this.reminders.findIndex((r) => r._id === id);
@@ -35,7 +35,7 @@ export const useReminderStore = defineStore('reminder', {
     async deleteReminder(id) {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
-      await axios.delete(`http://localhost:5000/api/reminders/${id}`, {
+      await axios.delete(`http://178.62.76.180:5000/api/reminders/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       this.reminders = this.reminders.filter((r) => r._id !== id);

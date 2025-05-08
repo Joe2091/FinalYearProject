@@ -31,7 +31,7 @@ export function useChatbot() {
 
       const token = await user.getIdToken();
 
-      const res = await axios.get('http://localhost:5000/api/getChats', {
+      const res = await axios.get('http://178.62.76.180:5000/api/getChats', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -56,7 +56,7 @@ export function useChatbot() {
       const token = await user.getIdToken();
 
       await axios.post(
-        'http://localhost:5000/api/saveChats',
+        'http://178.62.76.180:5000/api/saveChats',
         { chats: chats.value },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -156,7 +156,7 @@ export function useChatbot() {
         const token = await user.getIdToken();
 
         const response = await axios.post(
-          'http://localhost:5000/api/chat',
+          'http://178.62.76.180:5000/api/chat',
           { messages: chat.messages },
           { headers: { Authorization: `Bearer ${token}` } }
         );
