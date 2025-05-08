@@ -13,16 +13,26 @@ async function checkReminders() {
     for (const reminder of reminders) {
       const user = await User.findOne({ uid: reminder.createdBy });
       if (user && user.email) {
+        const localTime = new Date(reminder.datetime).toLocaleString('en-IE', {
+          timeZone: 'Europe/Dublin',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
+
         const body =
-          `"${reminder.title}"` +
+          `"${reminder.title}"\n\nDue: ${localTime}` +
           (reminder.content ? `\n\nDetails:\n${reminder.content}` : '');
 
         await sendReminderEmail(
           user.email,
-          reminder.title,
+          `Reminder: ${reminder.title}`,
           body,
           null,
-          reminder.datetime,
+          localTime,
         );
 
         reminder.notified = true;

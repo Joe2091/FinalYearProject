@@ -3,8 +3,9 @@ require('dotenv').config();
 
 const connectionString = process.env.AZURE_COMMUNICATION_CONNECTION_STRING;
 
-async function sendReminderEmail(to, subject, body, htmlBody) {
+async function sendReminderEmail(to, subject, body, htmlBody, localizedTime) {
   const emailClient = new EmailClient(connectionString);
+
   const message = {
     senderAddress: process.env.AZURE_SENDER_EMAIL,
     content: {
@@ -14,7 +15,7 @@ async function sendReminderEmail(to, subject, body, htmlBody) {
         htmlBody ||
         `
          <h2 style="color: #6a1b9a;">Reminder: ${subject}</h2>
-         <p><strong>Due:</strong> ${new Date().toLocaleString()}</p>
+         <p><strong>Due:</strong> ${localizedTime}</p>
         <p>${body.replace(/\n/g, '<br>')}</p>
         <hr />
         <footer style="font-size: 12px; color: #888;">Sent by Notemax</footer>
