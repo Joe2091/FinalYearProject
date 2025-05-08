@@ -24,7 +24,7 @@ jobs:
         working-directory: Backend
 
       - name: Run ESLint (lint check)
-        run: npm run lint
+        run: npx eslint .
         working-directory: Backend
 
       - name: Run backend tests
