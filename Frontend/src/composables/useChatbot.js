@@ -31,7 +31,7 @@ export function useChatbot() {
 
       const token = await user.getIdToken();
 
-      const res = await axios.get('https://notemax.site/api/getChats', {
+      const res = await axios.get('https://www.notemax.site/api/getChats', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -56,7 +56,7 @@ export function useChatbot() {
       const token = await user.getIdToken();
 
       await axios.post(
-        'https://notemax.site/api/saveChats',
+        'https://www.notemax.site/api/saveChats',
         { chats: chats.value },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -156,7 +156,7 @@ export function useChatbot() {
         const token = await user.getIdToken();
 
         const response = await axios.post(
-          'https://notemax.site/api/chat',
+          'https://www.notemax.site/api/chat',
           { messages: chat.messages },
           { headers: { Authorization: `Bearer ${token}` } }
         );

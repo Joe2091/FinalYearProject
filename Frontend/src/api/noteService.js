@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { auth } from '@/plugins/firebase';
 
-const API_URL = 'https://notemax.site/api/notes'; //Back to Local for Development (will switch from AWS to Azure)
+const API_URL = 'https://www.notemax.site/api/notes'; //Back to Local for Development (will switch from AWS to Azure)
 
 const getAuthHeaders = async () => {
   const user = auth.currentUser;

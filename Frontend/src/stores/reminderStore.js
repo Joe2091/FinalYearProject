@@ -10,7 +10,7 @@ export const useReminderStore = defineStore('reminder', {
     async fetchReminders() {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
-      const res = await axios.get('https://notemax.site/api/reminders', {
+      const res = await axios.get('https://www.notemax.site/api/reminders', {
         headers: { Authorization: `Bearer ${token}` },
       });
       this.reminders = res.data;
@@ -18,7 +18,7 @@ export const useReminderStore = defineStore('reminder', {
     async addReminder(data) {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
-      const res = await axios.post('https://notemax.site/api/reminders', data, {
+      const res = await axios.post('https://www.notemax.site/api/reminders', data, {
         headers: { Authorization: `Bearer ${token}` },
       });
       this.reminders.push(res.data);
@@ -26,7 +26,7 @@ export const useReminderStore = defineStore('reminder', {
     async updateReminder(id, updates) {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
-      const res = await axios.put(`https://notemax.site/api/reminders/${id}`, updates, {
+      const res = await axios.put(`https://www.notemax.site/api/reminders/${id}`, updates, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const index = this.reminders.findIndex((r) => r._id === id);
@@ -35,7 +35,7 @@ export const useReminderStore = defineStore('reminder', {
     async deleteReminder(id) {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
-      await axios.delete(`https://notemax.site/api/reminders/${id}`, {
+      await axios.delete(`https://www.notemax.site/api/reminders/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       this.reminders = this.reminders.filter((r) => r._id !== id);
