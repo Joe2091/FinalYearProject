@@ -1,7 +1,5 @@
 <script setup>
-import { computed } from 'vue';
 import { formatDistanceToNow } from 'date-fns';
-import { useTheme } from 'vuetify';
 
 const props = defineProps({
   items: { type: Array, required: true },
@@ -12,11 +10,6 @@ const props = defineProps({
   showRelative: { type: Boolean, default: true },
   editable: { type: Boolean, default: false },
 });
-
-const emit = defineEmits(['edit', 'delete']);
-
-const theme = useTheme();
-const isDark = computed(() => theme.global.name.value === 'dark');
 
 function formatDateParts(d) {
   const date = new Date(d);
@@ -33,11 +26,16 @@ function formatDateParts(d) {
       :key="r._id"
       :class="[
         'rounded-lg mb-2 px-4 py-2',
-        props.highlightPast && new Date(r.datetime) <= Date.now() ? 'bg-red-darken-1' : '',
+        props.highlightPast && new Date(r.datetime) <= Date.now()
+          ? 'bg-red-darken-1'
+          : '',
       ]"
     >
       <template #prepend>
-        <v-avatar :color="props.highlightPast ? 'red-darken-1' : 'primary'" size="26">
+        <v-avatar
+          :color="props.highlightPast ? 'red-darken-1' : 'primary'"
+          size="26"
+        >
           <v-icon size="18" :icon="props.icon" />
         </v-avatar>
       </template>

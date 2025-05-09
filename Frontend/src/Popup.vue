@@ -3,12 +3,8 @@ import { computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from 'vuetify';
 import Sidebar from '@/components/Sidebar.vue';
-import { useToastStore } from '@/stores/toastStore';
-import { useSnackbarStore } from '@/stores/snackbarStore';
 import { useRouter } from 'vue-router';
 
-const snackbar = useSnackbarStore();
-const showToast = snackbar.show;
 const theme = useTheme();
 const isDark = computed(() => theme.global.name.value === 'dark');
 const toggleTheme = () => {
@@ -37,7 +33,6 @@ onMounted(async () => {
     }
   }
 });
-const toast = useToastStore();
 </script>
 
 <template>

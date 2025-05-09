@@ -20,7 +20,10 @@ export function useChatbot() {
   const toast = useToastStore();
 
   const messages = computed(() => {
-    return chats.value.find((chat) => chat.id === currentChatId.value)?.messages || [];
+    return (
+      chats.value.find((chat) => chat.id === currentChatId.value)?.messages ||
+      []
+    );
   });
 
   async function fetchChats() {
@@ -58,7 +61,7 @@ export function useChatbot() {
       await axios.post(
         'https://www.notemax.site/api/saveChats',
         { chats: chats.value },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
     } catch (error) {
       console.error('Error saving chats:', error);
@@ -80,7 +83,7 @@ export function useChatbot() {
     async () => {
       await saveChats();
     },
-    { deep: true }
+    { deep: true },
   );
 
   function toggleSidebar() {
@@ -144,7 +147,6 @@ export function useChatbot() {
       chat.messages.push({ role: 'user', content: userInput.value });
       scrollToBottom();
 
-      const userMessage = userInput.value;
       userInput.value = '';
 
       try {
@@ -158,10 +160,13 @@ export function useChatbot() {
         const response = await axios.post(
           'https://www.notemax.site/api/chat',
           { messages: chat.messages },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
-        chat.messages.push({ role: 'assistant', content: response.data.content });
+        chat.messages.push({
+          role: 'assistant',
+          content: response.data.content,
+        });
         scrollToBottom();
       } catch (error) {
         console.error('Error getting chatbot response:', error);

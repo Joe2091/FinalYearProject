@@ -1,6 +1,6 @@
 console.log('Background script running...');
 //Chrome Extension Sending Notification
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
   if (message.type === 'show-notification') {
     chrome.notifications.create({
       type: 'basic',

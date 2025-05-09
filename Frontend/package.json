@@ -11,7 +11,8 @@
     "build:extension": "vite build --config vite.config.extension.js",
     "preview": "vite preview",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
