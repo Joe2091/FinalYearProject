@@ -40,7 +40,7 @@ const registerUser = async () => {
         >
       </div>
       <p class="mt-2 text-caption">
-        Already have an account?
+        Already have an account???
         <router-link to="/login" aria-label="Go to Register Page"
           >Login here</router-link
         >
