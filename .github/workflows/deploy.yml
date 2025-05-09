@@ -11,33 +11,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout code (for workflow context only)
         uses: actions/checkout@v3
 
-      - name: Install frontend dependencies and build
-        working-directory: ./Frontend
-        run: |
-          npm install
-          npm run build
-          npm run build:web
-
-      - name: Deploy backend and frontend
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: |
-            Backend/**
-            Frontend/dist-web
-          target: '~/FinalYearProject'
-
-      - name: Restart PM2 on server
+      - name: Deploy and build on Droplet
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/FinalYearProject/Backend
+
+            cd ~/FinalYearProject
+            git reset --hard
+            git pull origin main
+
+
+            cd Frontend
+            npm install
+            npm run build
+            npm run build:web
+
+
+            rm -rf ../Backend/dist-web
+            cp -r dist-web ../Backend/
+
+
+            cd ../Backend
             pm2 restart all
