@@ -33,9 +33,5 @@ jobs:
             npm run build:web
 
 
-            rm -rf ../Backend/dist-web
-            cp -r dist-web ../Backend/
-
-
             cd ../Backend
-            pm2 restart all
+            pm2 restart notemax
