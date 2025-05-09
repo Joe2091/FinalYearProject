@@ -1,19 +1,20 @@
 name: Deploy to Droplet
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ['CI - Backend Lint + Test  Frontend Lint']
+    types:
+      - completed
 
 jobs:
   build-and-deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Build frontend
       - name: Install frontend dependencies and build
         working-directory: ./Frontend
         run: |
@@ -21,13 +22,11 @@ jobs:
           npm run build
           npm run build:web
 
-      # Move built frontend into backend folder
       - name: Move built frontend into backend
         run: |
           rm -rf Backend/dist-web
           cp -r Frontend/dist-web Backend/
 
-      # Deploy backend + built frontend to server
       - name: Deploy to server
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -37,7 +36,6 @@ jobs:
           source: 'Backend/*'
           target: '~/FinalYearProject/Backend'
 
-      # Restart PM2 for deployment update
       - name: Restart PM2 on server
         uses: appleboy/ssh-action@v0.1.8
         with:
