@@ -27,7 +27,11 @@ const {
 </script>
 
 <template>
-  <v-container fluid class="chatbot-container" style="display: flex; height: 100vh; flex-direction: row">
+  <v-container
+    fluid
+    class="chatbot-container"
+    style="display: flex; height: 100vh; flex-direction: row"
+  >
     <!-- Sidebar -->
     <v-sheet
       class="chat-sidebar"
@@ -40,14 +44,35 @@ const {
         overflow-x: hidden;
       "
     >
-      <div style="display: flex; justify-content: center; margin-bottom: 8px; padding-top: 5px">
-        <v-btn icon size="small" @click="toggleSidebar" style="margin-bottom: 8px">
-          <v-icon>{{ sidebarCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          margin-bottom: 8px;
+          padding-top: 5px;
+        "
+      >
+        <v-btn
+          icon
+          size="small"
+          @click="toggleSidebar"
+          style="margin-bottom: 8px"
+        >
+          <v-icon>{{
+            sidebarCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left'
+          }}</v-icon>
         </v-btn>
       </div>
 
       <v-divider class="my-2"></v-divider>
-      <div style="display: flex; justify-content: center; margin-bottom: 8px; padding-top: 5px">
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          margin-bottom: 8px;
+          padding-top: 5px;
+        "
+      >
         <v-btn icon color="primary" @click="createNewChat" size="small">
           <v-icon>mdi-plus</v-icon>
         </v-btn>
@@ -77,13 +102,23 @@ const {
 
             <template v-else>
               <v-list-item-title
-                style="display: flex; align-items: center; justify-content: space-between; width: 100%"
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  width: 100%;
+                "
               >
                 <v-tooltip location="top">
                   <template #activator="{ props }">
                     <span
                       v-bind="props"
-                      style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 160px"
+                      style="
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                        max-width: 160px;
+                      "
                     >
                       {{ chat.name }}
                     </span>
@@ -93,7 +128,12 @@ const {
 
                 <v-menu :close-on-content-click="false" offset-y>
                   <template #activator="{ props }">
-                    <v-btn icon size="x-small" v-bind="props" class="no-outline">
+                    <v-btn
+                      icon
+                      size="x-small"
+                      v-bind="props"
+                      class="no-outline"
+                    >
                       <v-icon size="18">mdi-dots-vertical</v-icon>
                     </v-btn>
                   </template>
@@ -121,12 +161,23 @@ const {
       </div>
     </v-sheet>
 
-    <div class="chat-main" style="flex: 1; display: flex; flex-direction: column">
+    <div
+      class="chat-main"
+      style="flex: 1; display: flex; flex-direction: column"
+    >
       <v-overlay v-if="loading" absolute opacity="0.9">
-        <v-progress-circular indeterminate size="64" color="primary"></v-progress-circular>
+        <v-progress-circular
+          indeterminate
+          size="64"
+          color="primary"
+        ></v-progress-circular>
       </v-overlay>
       <!-- Chat Messages -->
-      <div ref="chatContainer" class="chat-messages" style="flex: 1; overflow-y: auto; padding: 1rem">
+      <div
+        ref="chatContainer"
+        class="chat-messages"
+        style="flex: 1; overflow-y: auto; padding: 1rem"
+      >
         <div
           v-for="(message, index) in messages"
           :key="index"

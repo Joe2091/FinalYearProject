@@ -1,14 +1,13 @@
 name: Deploy to Droplet
 
 on:
-  workflow_run:
-    workflows: ['CI - Backend Lint + Test Frontend Lint']
-    types:
-      - completed
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
