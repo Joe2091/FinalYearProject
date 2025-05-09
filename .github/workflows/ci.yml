@@ -1,4 +1,4 @@
-name: CI - Backend Lint + Test  Frontend Lint
+name: CI - Backend Lint + Test Frontend Lint
 
 on:
   push:
