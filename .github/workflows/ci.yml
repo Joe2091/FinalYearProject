@@ -1,4 +1,4 @@
-name: CI - Run Backend & Frontend Tests Only
+name: CI - Backend Lint + Test  Frontend Lint
 
 on:
   push:
