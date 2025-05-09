@@ -29,7 +29,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: |
             Backend/**
-            Frontend/dist-web/**
+            Frontend/dist-web
           target: '~/FinalYearProject'
 
       - name: Restart PM2 on server
