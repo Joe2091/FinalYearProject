@@ -1,4 +1,4 @@
-name: CI - Run Backend Tests Only
+name: CI - Run Backend & Frontend Tests Only
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-backend-tests:
+  run-tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,18 +19,28 @@ jobs:
         with:
           node-version: '22.x'
 
+      # Backend Lint & Test
       - name: Install backend dependencies
         run: npm install
         working-directory: Backend
 
-      - name: Fix ESLint permissions
+      - name: Fix backend ESLint permissions
         run: chmod +x node_modules/.bin/eslint
         working-directory: Backend
 
-      - name: Run ESLint (lint check)
+      - name: Run backend ESLint
         run: npx eslint .
         working-directory: Backend
 
       - name: Run backend tests
         run: npm test
         working-directory: Backend
+
+      # Frontend Lint
+      - name: Install frontend dependencies
+        run: npm install
+        working-directory: Frontend
+
+      - name: Run frontend ESLint
+        run: npx eslint . --ext .js,.vue
+        working-directory: Frontend
