@@ -21,19 +21,16 @@ jobs:
           npm run build
           npm run build:web
 
-      - name: Move built frontend into backend
-        run: |
-          rm -rf Backend/dist-web
-          cp -r Frontend/dist-web Backend/
-
-      - name: Deploy to server
+      - name: Deploy backend and frontend
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: 'Backend/*'
-          target: '~/FinalYearProject/Backend'
+          source: |
+            Backend/**
+            Frontend/dist-web/**
+          target: '~/FinalYearProject'
 
       - name: Restart PM2 on server
         uses: appleboy/ssh-action@v0.1.8
