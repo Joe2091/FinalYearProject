@@ -1,3 +1,4 @@
+// azureEmailService Unit Tests
 jest.mock('@azure/communication-email', () => {
   return {
     EmailClient: jest.fn().mockImplementation(() => ({

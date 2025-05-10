@@ -1,3 +1,4 @@
+// summarize integration tests
 jest.mock('../services/azureOpenAIService', () => ({
   summarizeNote: jest.fn(),
 }));
