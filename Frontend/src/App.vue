@@ -16,7 +16,7 @@ if (savedTheme) {
 const isExtension = window.location.protocol === 'chrome-extension:';
 onMounted(() => {
   if (isExtension) {
-    router.replace('/'); // Redirect back to home
+    router.replace('/'); // Redirect back to home if extension
   }
 });
 const toggleTheme = () => {
@@ -44,6 +44,7 @@ const logout = async () => {
 
 <template>
   <v-app>
+    <!--Global toast-->
     <v-snackbar
       v-model="toast.visible"
       :color="toast.color"
@@ -66,7 +67,9 @@ const logout = async () => {
       <v-list>
         <v-list-item class="d-flex justify-end">
           <v-btn icon @click="toggleCollapse" variant="text" size="small">
-            <v-icon>{{ isCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
+            <v-icon>{{
+              isCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left'
+            }}</v-icon>
           </v-btn>
         </v-list-item>
 
@@ -76,7 +79,11 @@ const logout = async () => {
           link
           to="/"
           :class="[
-            $route.path === '/' ? (isDark ? 'active-item-dark' : 'active-item-light') : '',
+            $route.path === '/'
+              ? isDark
+                ? 'active-item-dark'
+                : 'active-item-light'
+              : '',
             $route.path === '/' ? 'no-hover' : '',
           ]"
         >
@@ -88,7 +95,11 @@ const logout = async () => {
           link
           to="/reminder"
           :class="[
-            $route.path === '/reminder' ? (isDark ? 'active-item-dark' : 'active-item-light') : '',
+            $route.path === '/reminder'
+              ? isDark
+                ? 'active-item-dark'
+                : 'active-item-light'
+              : '',
             $route.path === '/reminder' ? 'no-hover' : '',
           ]"
         >
@@ -101,7 +112,11 @@ const logout = async () => {
             link
             to="/chat"
             :class="[
-              $route.path === '/chat' ? (isDark ? 'active-item-dark' : 'active-item-light') : '',
+              $route.path === '/chat'
+                ? isDark
+                  ? 'active-item-dark'
+                  : 'active-item-light'
+                : '',
               $route.path === '/chat' ? 'no-hover' : '',
             ]"
           >
@@ -117,7 +132,11 @@ const logout = async () => {
             link
             to="/login"
             :class="[
-              $route.path === '/login' ? (isDark ? 'active-item-dark' : 'active-item-light') : '',
+              $route.path === '/login'
+                ? isDark
+                  ? 'active-item-dark'
+                  : 'active-item-light'
+                : '',
               $route.path === '/login' ? 'no-hover' : '',
             ]"
           >
@@ -129,7 +148,11 @@ const logout = async () => {
             link
             to="/register"
             :class="[
-              $route.path === '/register' ? (isDark ? 'active-item-dark' : 'active-item-light') : '',
+              $route.path === '/register'
+                ? isDark
+                  ? 'active-item-dark'
+                  : 'active-item-light'
+                : '',
               $route.path === '/register' ? 'no-hover' : '',
             ]"
           >
@@ -143,7 +166,11 @@ const logout = async () => {
             link
             to="/account"
             :class="[
-              $route.path === '/account' ? (isDark ? 'active-item-dark' : 'active-item-light') : '',
+              $route.path === '/account'
+                ? isDark
+                  ? 'active-item-dark'
+                  : 'active-item-light'
+                : '',
               $route.path === '/account' ? 'no-hover' : '',
             ]"
           >
@@ -153,7 +180,9 @@ const logout = async () => {
 
           <v-list-item @click="toggleTheme" link>
             <v-icon start>
-              {{ isDark ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}
+              {{
+                isDark ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent'
+              }}
             </v-icon>
             <v-list-item-title v-if="!isCollapsed">
               {{ isDark ? 'Light Mode' : 'Dark Mode' }}

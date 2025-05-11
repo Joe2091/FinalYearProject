@@ -19,6 +19,7 @@ export function useChatbot() {
   const sidebarCollapsed = ref(false);
   const toast = useToastStore();
 
+  //Reactive computed messages for currently selected chat
   const messages = computed(() => {
     return (
       chats.value.find((chat) => chat.id === currentChatId.value)?.messages ||
@@ -26,6 +27,7 @@ export function useChatbot() {
     );
   });
 
+  //Fetch chat history from backend
   async function fetchChats() {
     try {
       const auth = getAuth();
@@ -38,6 +40,7 @@ export function useChatbot() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      // Existing chats loaded or create new
       if (res.data && res.data.length > 0) {
         chats.value = res.data;
         currentChatId.value = res.data[0]?.id || null;
@@ -50,6 +53,7 @@ export function useChatbot() {
     }
   }
 
+  //Save chat history to backend
   async function saveChats() {
     try {
       const auth = getAuth();
@@ -68,6 +72,7 @@ export function useChatbot() {
     }
   }
 
+  //When component mounts, load chats and scroll to bottom of chat (most recent message)
   onMounted(async () => {
     loading.value = true;
     await fetchChats();
@@ -78,6 +83,7 @@ export function useChatbot() {
     });
   });
 
+  //Automatically save chats when they change
   watch(
     chats,
     async () => {
@@ -86,10 +92,12 @@ export function useChatbot() {
     { deep: true },
   );
 
+  //sidebar toggle
   function toggleSidebar() {
     sidebarCollapsed.value = !sidebarCollapsed.value;
   }
 
+  //create new chat session
   function createNewChat() {
     const newChat = {
       id: Date.now().toString(),
@@ -102,6 +110,7 @@ export function useChatbot() {
     toast.show('New chat created', 'success');
   }
 
+  //select a different chat
   function selectChat(id) {
     currentChatId.value = id;
     nextTick(() => {
@@ -109,6 +118,7 @@ export function useChatbot() {
     });
   }
 
+  //rename a chat
   const confirmRename = (id) => {
     if (!chatNameInput.value.trim()) return;
     const chat = chats.value.find((c) => c.id === id);
@@ -118,6 +128,7 @@ export function useChatbot() {
     renameDialog.value = null;
   };
 
+  //Delete chat by ID
   function deleteChat(id) {
     const deleted = chats.value.find((chat) => chat.id === id);
     chats.value = chats.value.filter((chat) => chat.id !== id);
@@ -128,6 +139,7 @@ export function useChatbot() {
     toast.show(`Deleted chat "${deleted?.name || 'Chat'}"`, 'error');
   }
 
+  //Scroll chat view to bottom
   function scrollToBottom() {
     nextTick(() => {
       if (chatContainer.value) {
@@ -139,11 +151,13 @@ export function useChatbot() {
     });
   }
 
+  //send a message to the chatbot and get a reply
   async function sendMessage() {
     if (userInput.value.trim() !== '') {
       const chat = chats.value.find((c) => c.id === currentChatId.value);
       if (!chat) return;
 
+      //add user's message
       chat.messages.push({ role: 'user', content: userInput.value });
       scrollToBottom();
 
@@ -163,6 +177,7 @@ export function useChatbot() {
           { headers: { Authorization: `Bearer ${token}` } },
         );
 
+        //Add assistant's reply
         chat.messages.push({
           role: 'assistant',
           content: response.data.content,
@@ -177,7 +192,7 @@ export function useChatbot() {
       }
     }
   }
-
+  //methods and properties can be used in other componenets
   return {
     chats,
     currentChatId,

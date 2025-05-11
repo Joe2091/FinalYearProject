@@ -31,7 +31,7 @@ const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value;
 };
 
-const webAppUrl = 'https://www.notemax.site/';
+const webAppUrl = 'https://www.notemax.site/'; // Link from Extension Sidebar to Web Application
 
 function openWebApp() {
   window.open(webAppUrl, '_blank');

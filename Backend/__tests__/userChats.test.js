@@ -14,6 +14,7 @@ jest.mock('../middleware/verifyToken', () => (req, res, next) => {
 
 let mongoServer;
 
+//setup in-memory MongoDB
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   await mongoose.connect(mongoServer.getUri());
@@ -23,6 +24,7 @@ afterEach(async () => {
   await UserChats.deleteMany(); //After each test chat collection is cleared
 });
 
+//Close Db and server after tests
 afterAll(async () => {
   await mongoose.disconnect();
   await mongoServer.stop();
@@ -33,7 +35,7 @@ describe('UserChats API', () => {
     const res = await request(app)
       .post('/api/saveChats')
       .set('Authorization', 'Bearer test-token')
-      .send({ chats: ['Hello World', 'Test chat'] });
+      .send({ chats: ['Test Input', 'Test chat'] });
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe('Chats saved successfully');
@@ -43,14 +45,14 @@ describe('UserChats API', () => {
     await request(app)
       .post('/api/saveChats')
       .set('Authorization', 'Bearer test-token')
-      .send({ chats: ['Hello World', 'Test chat'] });
+      .send({ chats: ['Test Input', 'Test chat'] });
 
     const res = await request(app)
       .get('/api/getChats')
       .set('Authorization', 'Bearer test-token');
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual(['Hello World', 'Test chat']);
+    expect(res.body).toEqual(['Test Input', 'Test chat']);
   });
 
   test('saveChats should fail when chats are missing', async () => {
