@@ -27,6 +27,9 @@ async function checkReminders() {
           `"${reminder.title}"\n\nDue: ${localTime}` +
           (reminder.content ? `\n\nDetails:\n${reminder.content}` : '');
 
+        reminder.notified = true;
+        await reminder.save();
+
         await sendReminderEmail(
           user.email,
           `Reminder: ${reminder.title}`,
@@ -35,9 +38,6 @@ async function checkReminders() {
           localTime,
           reminder,
         );
-
-        reminder.notified = true;
-        await reminder.save();
       }
     }
   } catch (err) {
