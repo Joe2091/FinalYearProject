@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const verifyToken = require('./middleware/verifyToken');
 const Note = require('./models/Note');
+
+//route handlers imported
 const summarizeRoute = require('./routes/summarize');
 const chatRoute = require('./routes/chat');
 const userChatsRoutes = require('./routes/userChats');
@@ -20,6 +22,7 @@ const allowedOrigins = [
 ];
 
 app.use(express.json());
+//CORS setup to allow extension and frontend requests
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -39,9 +42,9 @@ app.use(
   }),
 );
 
-// Note routes
-//app.get('/', (req, res) => res.send('Notes API is running...'));
+//Start of Notes API Endpoints
 
+//Create new note
 app.post('/api/notes', verifyToken, async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -54,6 +57,7 @@ app.post('/api/notes', verifyToken, async (req, res) => {
   }
 });
 
+//get all notes owned or shared with
 app.get('/api/notes', verifyToken, async (req, res) => {
   try {
     const notes = await Note.find({
@@ -66,6 +70,7 @@ app.get('/api/notes', verifyToken, async (req, res) => {
   }
 });
 
+//Update a note (if user is owner or shared with user)
 app.put('/api/notes/:id', verifyToken, async (req, res) => {
   try {
     const { title, content, isFavorite } = req.body;
@@ -88,6 +93,7 @@ app.put('/api/notes/:id', verifyToken, async (req, res) => {
   }
 });
 
+//Delete a note (Owner delete completely, shared user removes)
 app.delete('/api/notes/:id', verifyToken, async (req, res) => {
   try {
     const userId = req.user.uid;
@@ -110,6 +116,7 @@ app.delete('/api/notes/:id', verifyToken, async (req, res) => {
   }
 });
 
+//toggle note favorite for user
 app.post('/api/notes/:id/favorite', verifyToken, async (req, res) => {
   try {
     const userId = req.user.uid;
@@ -132,9 +139,9 @@ app.post('/api/notes/:id/favorite', verifyToken, async (req, res) => {
 });
 
 // Other routes
-app.use('/api/summarize', verifyToken, summarizeRoute);
-app.use('/api/chat', verifyToken, chatRoute);
-app.use('/api/reminders', remindersRoute);
-app.use('/api', userChatsRoutes);
+app.use('/api/summarize', verifyToken, summarizeRoute); //Azure Summarization
+app.use('/api/chat', verifyToken, chatRoute); //Azure AI Chatbot
+app.use('/api/reminders', remindersRoute); // Reminder CRUD and email logic
+app.use('/api', userChatsRoutes); //Chatbot history saving/loading
 
 module.exports = app;

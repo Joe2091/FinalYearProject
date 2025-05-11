@@ -17,6 +17,7 @@ const allowedOrigins = [
   'https://www.notemax.site',
 ];
 
+//Validate allowed CORS origins
 function isAllowedOrigin(origin) {
   if (!origin) return true;
   if (allowedOrigins.includes(origin)) return true;
@@ -25,7 +26,7 @@ function isAllowedOrigin(origin) {
   return false;
 }
 
-// CORS middleware
+// CORS middleware for HTTP requests
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -54,6 +55,7 @@ app.use(express.static(frontendPath));
 // Create HTTP server and Socket.IO server
 const server = http.createServer(app);
 
+// Socket.IO attached to HTTP server for real-time functionality
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
@@ -70,17 +72,19 @@ const io = new Server(server, {
   },
 });
 
-// Set up WebSocket and routes
+// Set up WebSocket listeners
 require('./sockets/notesSocket')(io);
+
+//API route for note sharing (passed in io instance)
 const shareNotesRoute = require('./routes/shareNotes')(io);
 app.use('/api', shareNotesRoute);
 
-// Catch-all route to serve SPA index.html
+// Catch-all route to handle Vue SPA routing
 app.get('*', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-// Start server
+// Start WebSocket and HTTP Server
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server with WebSocket running on http://0.0.0.0:${PORT}`);
 });

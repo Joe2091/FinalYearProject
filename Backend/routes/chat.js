@@ -7,14 +7,16 @@ const endpoint = process.env.AZURE_OPENAI_CHATBOT_ENDPOINT;
 const deployment = process.env.AZURE_OPENAI_CHATBOT_DEPLOYMENT_NAME;
 const apiVersion = process.env.AZURE_OPENAI_CHATBOT_API_VERSION;
 const apiKey = process.env.AZURE_OPENAI_CHATBOT_API_KEY;
-
+// chat endpoint (protected by Firebase middleware)
 router.post('/', verifyToken, async (req, res) => {
   const { messages } = req.body;
 
+  //messages must be in an array
   if (!Array.isArray(messages)) {
     return res.status(400).json({ error: 'Missing or invalid messages' });
   }
 
+  //prompt telling AI how to behave
   const systemPrompt = {
     role: 'system',
     content: `
@@ -32,6 +34,7 @@ If the user asks for a story or narrative, respond in flowing paragraphs instead
   const updatedMessages = [systemPrompt, ...messages];
 
   try {
+    //request to Azure OpenAI sent
     const response = await axios.post(
       `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`,
       {
@@ -47,6 +50,7 @@ If the user asks for a story or narrative, respond in flowing paragraphs instead
       },
     );
 
+    //AI assistants reply is returned
     const reply = response.data.choices[0].message;
     res.json(reply);
   } catch (error) {

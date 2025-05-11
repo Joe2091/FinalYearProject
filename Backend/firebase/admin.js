@@ -11,7 +11,7 @@ const app = initializeApp({
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
   }),
 });
-
+// Authentication is gotten from initialized Firebase app
 const adminAuth = getAuth(app);
-
+//Exported auth instance to verify tokens in middleware
 module.exports = { adminAuth };

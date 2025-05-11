@@ -1,10 +1,12 @@
 const Reminder = require('../models/Reminder');
 const User = require('../models/User');
-const { sendReminderEmail } = require('./azureEmailService');
+const { sendReminderEmail } = require('./azureEmailService'); //email function using Azure
 
+//Function checking for due reminders to send email notification
 async function checkReminders() {
-  const now = new Date();
+  const now = new Date(); //get current date/time
   try {
+    //Find all reminders that are due and not notified
     const reminders = await Reminder.find({
       datetime: { $lte: now },
       notified: { $ne: true },
@@ -27,9 +29,11 @@ async function checkReminders() {
           `"${reminder.title}"\n\nDue: ${localTime}` +
           (reminder.content ? `\n\nDetails:\n${reminder.content}` : '');
 
+        //reminder notified field set to true to avoid repeat notifications.
         reminder.notified = true;
         await reminder.save();
 
+        // reminder email sent using Azure Commmunication Services
         await sendReminderEmail(
           user.email,
           `Reminder: ${reminder.title}`,
@@ -45,6 +49,7 @@ async function checkReminders() {
   }
 }
 
+// check every 10 seconds for reminder (unless testing)
 if (process.env.NODE_ENV !== 'test') {
   setInterval(checkReminders, 10 * 1000);
 }

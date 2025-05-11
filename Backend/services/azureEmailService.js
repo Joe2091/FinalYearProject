@@ -34,6 +34,7 @@ async function sendReminderEmail(
   };
 
   try {
+    //Send email and wait for the operation to complete
     const poller = await emailClient.beginSend(message);
     const response = await poller.pollUntilDone();
     console.log('Email send status:', response.status);
