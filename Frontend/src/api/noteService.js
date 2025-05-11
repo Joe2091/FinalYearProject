@@ -1,12 +1,14 @@
 import axios from 'axios';
 import { auth } from '@/plugins/firebase';
 
-const API_URL = 'https://www.notemax.site/api/notes'; //Back to Local for Development (will switch from AWS to Azure)
+const API_URL = 'https://www.notemax.site/api/notes'; // API Base notes URL
 
+//function attaching Firebase token to all requests
 const getAuthHeaders = async () => {
   const user = auth.currentUser;
   if (!user) throw new Error('User not authenticated');
 
+  //fresh ID token from Firebase
   const token = await user.getIdToken(true);
   return {
     headers: {
@@ -16,7 +18,7 @@ const getAuthHeaders = async () => {
   };
 };
 
-// Fetch all notes
+// Fetch all notes for authenticated user
 export const getNotes = async () => {
   try {
     const headers = await getAuthHeaders();
@@ -40,7 +42,7 @@ export const createNote = async (note) => {
   }
 };
 
-// Update a note
+// Update a note by ID
 export const updateNote = async (id, note) => {
   try {
     const headers = await getAuthHeaders();
@@ -52,7 +54,7 @@ export const updateNote = async (id, note) => {
   }
 };
 
-// Delete a note
+// Delete a note by ID
 export const deleteNote = async (id) => {
   try {
     const headers = await getAuthHeaders();

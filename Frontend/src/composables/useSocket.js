@@ -2,31 +2,30 @@ import { io } from 'socket.io-client';
 import { ref, onBeforeUnmount } from 'vue';
 import { getAuth } from 'firebase/auth';
 
+//connected to backend WebSocket server
 const socket = io('https://www.notemax.site', {
   withCredentials: true,
 });
 
 const isConnected = ref(false);
 
-// Event listeners are tracked to avoid duplicates
+// Track joined notes and registered listeners
 const joinedNotes = new Set();
 const listeners = new Map();
 
+//connection status handlers
 socket.on('connect', () => {
   isConnected.value = true;
-  console.log('Connected to WebSocket:', socket.id);
 });
 
 socket.on('disconnect', () => {
   isConnected.value = false;
-  console.log('Disconnected from WebSocket');
 });
 
 function joinNote(noteId) {
   if (!joinedNotes.has(noteId)) {
     socket.emit('join-note', noteId);
     joinedNotes.add(noteId);
-    console.log(`${noteId}`);
   }
 }
 
@@ -34,6 +33,7 @@ function emitNoteCreated(note) {
   socket.emit('note-created', note);
 }
 
+//Register listener for new note (real-time)
 function onNoteCreated(callback) {
   if (!listeners.has('note-created')) {
     socket.on('note-created', (note) => {
@@ -48,6 +48,7 @@ function emitNoteUpdate(noteId, title, content) {
   socket.emit('note-updated', { noteId, title, content });
 }
 
+//listener registered for real-time updates
 function onNoteUpdate(callback) {
   if (!listeners.has('note-updated')) {
     socket.on('note-updated', (payload) => {
@@ -58,6 +59,7 @@ function onNoteUpdate(callback) {
   }
 }
 
+//listener registered for note that is shared
 function onNoteShared(callback) {
   if (!listeners.has('note-shared')) {
     socket.on('note-shared', (note) => {
@@ -97,6 +99,7 @@ function onNoteFavorited(callback) {
   }
 }
 
+//cleanup all listeners and joined rooms when componenet unmounted
 function cleanupListeners() {
   for (const [event, handler] of listeners.entries()) {
     socket.off(event, handler);

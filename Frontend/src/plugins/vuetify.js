@@ -4,8 +4,9 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi';
 
 const vuetify = createVuetify({
   theme: {
-    defaultTheme: 'light',
+    defaultTheme: 'light', //default theme = light
     themes: {
+      //light theme config
       light: {
         dark: false,
         colors: {
@@ -19,6 +20,7 @@ const vuetify = createVuetify({
           warning: '#FB8C00',
         },
       },
+      //dark theme config
       dark: {
         dark: true,
         colors: {
@@ -37,7 +39,7 @@ const vuetify = createVuetify({
   icons: {
     defaultSet: 'mdi',
     aliases,
-    sets: { mdi },
+    sets: { mdi }, //loads mdi icon set
   },
 });
 

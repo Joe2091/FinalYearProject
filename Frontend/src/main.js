@@ -16,8 +16,10 @@ app.use(pinia);
 app.use(vuetify);
 app.use(router);
 
+//app mounting tracked
 let appHasMounted = false;
 
+//Listen for Firebase authentication state changes
 auth.onAuthStateChanged(async (user) => {
   const authStore = useAuthStore();
 
@@ -27,6 +29,7 @@ auth.onAuthStateChanged(async (user) => {
     authStore.logout();
   }
 
+  //app mounted once after auth state is resolved
   if (!appHasMounted) {
     app.mount('#app');
     appHasMounted = true;
