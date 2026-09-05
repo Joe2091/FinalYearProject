@@ -11,4 +11,4 @@ npm run build (to build Chrome extension
 
 to load extension into chrome, go to chrome://extensions/ with developer mode on, load unpacked in the top left and select "dist" folder in frontend. (dist-web is for the web application)
 
-Deployed Application on a Digital Ocean Droplet at : https://notemax.site/
+Deployed Application on a Digital Ocean Droplet at : https://notemax.site/ **CURRENTLY NOT HOSTED**
